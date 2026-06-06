@@ -868,11 +868,14 @@ const PERSONALITY_QUESTIONS = [
 ];
 
 // ─── BUILD FUNCTION — assembles 41 questions for the selected role ───
-function resolveRoleKey(role) {
-  const keys = Object.keys(ROLE_COGNITIVE);
+function resolveKey(dict, role, fallback) {
+  const keys = Object.keys(dict);
   return keys.find(k => k === role)
     || keys.find(k => role && role.toLowerCase().includes(k.split('/')[0].trim().toLowerCase()))
-    || 'Care Aide / PSW';
+    || fallback;
+}
+function resolveRoleKey(role) {
+  return resolveKey(ROLE_COGNITIVE, role, 'Care Aide / PSW');
 }
 
 function buildQuestions(role) {
@@ -894,11 +897,20 @@ const LIKERT_VALUES = [1, 2, 3, 4, 5];
 const ADMIN_PASSWORD = 'bentley2026';
 const STORAGE_KEY = 'bentley_assessment_results';
 
+function escapeHTML(str) {
+  return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function csvField(val) {
+  const s = String(val ?? '');
+  return (s.includes(',') || s.includes('"') || s.includes('\n')) ? `"${s.replace(/"/g,'""')}"` : s;
+}
+
 // State
 let currentQ = 0;
 let answers = {};
 let candidateName = '';
 let candidateRole = '';
+let _resultById = {};
 
 // ══════════════════════════════════════════
 // NAVIGATION
@@ -1005,6 +1017,10 @@ function selectLikert(val) {
 // ══════════════════════════════════════════
 function submitAssessment() {
   const scores = calculateScores();
+  if (!scores) {
+    alert('An error occurred scoring the assessment. Please contact your administrator.');
+    return;
+  }
   const result = {
     id: Date.now(),
     name: candidateName,
@@ -1104,9 +1120,9 @@ function calculateScores() {
 function auditAssessment() {
   let issues = [];
 
-  // Check question structure: now 39 questions (15 cognitive + 16 EQ + 10 personality)
-  if (!QUESTIONS || QUESTIONS.length !== 39) {
-    issues.push(`ERROR: Expected 39 questions, found ${QUESTIONS.length}`);
+  // Check question structure: 41 questions (15 cognitive + 16 EQ + 10 personality)
+  if (!QUESTIONS || QUESTIONS.length !== 41) {
+    issues.push(`ERROR: Expected 41 questions, found ${QUESTIONS.length}`);
   }
 
   // Check cognitive questions (Q1-15)
@@ -1150,9 +1166,9 @@ function auditAssessment() {
     isValid: issues.length === 0,
     issueCount: issues.length,
     issues: issues,
-    totalQuestions: 39,
+    totalQuestions: 41,
     breakdown: { cognitive: 15, eq: 16, personality: 10 },
-    summary: issues.length === 0 ? '✓ Assessment structure is valid (39 questions, professional-grade screening)' : `✗ Found ${issues.length} issues`
+    summary: issues.length === 0 ? '✓ Assessment structure is valid (41 questions, professional-grade screening)' : `✗ Found ${issues.length} issues`
   };
 }
 
@@ -1183,6 +1199,8 @@ function getResults() {
 
 function renderResults() {
   const results = getResults();
+  _resultById = {};
+  results.forEach(r => (_resultById[r.id] = r));
   const el = document.getElementById('resultsContent');
 
   if (!results.length) {
@@ -1206,9 +1224,9 @@ function renderResults() {
       : rub.verdict === 'CONDITIONAL — INTERVIEW REQUIRED' ? 'score-mid'
       : 'score-low';
     html += `<tr>
-      <td class="name">${r.name}</td>
-      <td>${r.role}</td>
-      <td>${r.date} ${r.time}</td>
+      <td class="name">${escapeHTML(r.name)}</td>
+      <td>${escapeHTML(r.role)}</td>
+      <td>${escapeHTML(r.date)} ${escapeHTML(r.time)}</td>
       <td><span class="score-pill ${rub.composite>=75?'score-high':rub.composite>=65?'score-mid':'score-low'}">${rub.composite}%</span></td>
       <td><span class="score-pill ${rub.passCog?'score-high':'score-low'}">${rub.cog}%</span></td>
       <td><span class="score-pill ${rub.passEQ?'score-high':'score-low'}">${rub.eq}%</span></td>
@@ -1308,10 +1326,8 @@ const ROLE_RUBRICS = {
 };
 
 function resolveRubric(role) {
-  if (ROLE_RUBRICS[role]) return ROLE_RUBRICS[role];
-  // Fallback: match partial role name
-  const key = Object.keys(ROLE_RUBRICS).find(k => role && role.toLowerCase().includes(k.split('/')[0].trim().toLowerCase()));
-  return key ? ROLE_RUBRICS[key] : ROLE_RUBRICS['Cook']; // safe default
+  const key = resolveKey(ROLE_RUBRICS, role, 'Cook');
+  return ROLE_RUBRICS[key];
 }
 
 function getRubric(scores, role) {
@@ -1364,9 +1380,9 @@ function getRubric(scores, role) {
   };
 }
 
-function generateNarrative(scores, role) {
+function generateNarrative(scores, role, name) {
   const r = getRubric(scores, role || scores.role);
-  const name = scores.name;
+  name = name || 'Candidate';
   const ocean = scores.ocean;
   const roleName = r.rubricDef.description;
 
@@ -1407,12 +1423,11 @@ function generateNarrative(scores, role) {
 }
 
 function openModal(id) {
-  const results = getResults();
-  const r = results.find(x => x.id === id);
+  const r = _resultById[id];
   if (!r) return;
 
   const { cognitive, eq, ocean } = r.scores;
-  const { narrative, rubric } = generateNarrative(r.scores, r.role);
+  const { narrative, rubric } = generateNarrative(r.scores, r.role, r.name);
 
   let oceanBars = '';
   Object.entries(ocean).forEach(([trait, pct]) => {
@@ -1440,8 +1455,8 @@ function openModal(id) {
 
   const html = `
     <button class="modal-close" onclick="closeModal()">✕</button>
-    <h3>${r.name}</h3>
-    <div class="meta">${r.role} · ${r.date} at ${r.time}</div>
+    <h3>${escapeHTML(r.name)}</h3>
+    <div class="meta">${escapeHTML(r.role)} · ${escapeHTML(r.date)} at ${escapeHTML(r.time)}</div>
 
     <!-- VERDICT BADGE -->
     <div style="background:${rubric.verdictBg};border:1.5px solid ${rubric.verdictColor}33;border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
@@ -1458,20 +1473,20 @@ function openModal(id) {
     <!-- THRESHOLD CHECKS -->
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
       <div style="background:var(--cream);border:1px solid ${rubric.passCog ? '#A5D6A7' : '#FFCDD2'};border-radius:8px;padding:10px 12px;">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:3px;">Cognitive ≥73%</div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:3px;">Cognitive ≥${rubric.minCog}%</div>
         <div style="font-size:16px;font-weight:700;color:${rubric.passCog ? '#2E7D32' : '#B71C1C'}">${rubric.cog}% ${rubric.passCog ? '✓' : '✗'}</div>
       </div>
       <div style="background:var(--cream);border:1px solid ${rubric.passEQ ? '#A5D6A7' : '#FFCDD2'};border-radius:8px;padding:10px 12px;">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:3px;">EQ ≥75%</div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:3px;">EQ ≥${rubric.minEQ}%</div>
         <div style="font-size:16px;font-weight:700;color:${rubric.passEQ ? '#2E7D32' : '#B71C1C'}">${rubric.eq}% ${rubric.passEQ ? '✓' : '✗'}</div>
       </div>
       <div style="background:var(--cream);border:1px solid ${rubric.passPersonality ? '#A5D6A7' : '#FFCDD2'};border-radius:8px;padding:10px 12px;">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:3px;">Personality ≥65%</div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:3px;">Personality ≥${rubric.minPersonality}%</div>
         <div style="font-size:16px;font-weight:700;color:${rubric.passPersonality ? '#2E7D32' : '#B71C1C'}">${rubric.avgPersonality}% ${rubric.passPersonality ? '✓' : '✗'}</div>
       </div>
     </div>
     <!-- KEY TRAIT CHECKS (role-specific) -->
-    <div style="margin-bottom:6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);">Key Traits for ${r.role}</div>
+    <div style="margin-bottom:6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);">Key Traits for ${escapeHTML(r.role)}</div>
     <div style="display:grid;grid-template-columns:repeat(${Object.keys(rubric.traitResults).length},1fr);gap:8px;margin-bottom:20px;">
       ${Object.entries(rubric.traitResults).map(([trait, t]) => `
       <div style="background:var(--cream);border:1px solid ${t.pass ? '#A5D6A7' : '#FFCDD2'};border-radius:8px;padding:10px 12px;">
@@ -1500,7 +1515,7 @@ function openModal(id) {
       </div>
       <div class="score-block">
         <div class="label">Avg Personality</div>
-        <div class="val">${Math.round(Object.values(ocean).reduce((a,b)=>a+b,0)/Object.values(ocean).length)}%</div>
+        <div class="val">${rubric.avgPersonality}%</div>
         <div class="max">Overall fit score</div>
       </div>
     </div>
@@ -1526,6 +1541,8 @@ function closeModal(e) {
 }
 
 function clearResults() {
+  const pw = prompt('Enter admin password to confirm deletion:');
+  if (pw !== ADMIN_PASSWORD) { alert('Incorrect password. Deletion cancelled.'); return; }
   if (confirm('Delete ALL candidate results? This cannot be undone.')) {
     localStorage.removeItem(STORAGE_KEY);
     renderResults();
@@ -1547,7 +1564,7 @@ function exportCSV() {
     r.scores.ocean['Stress Tolerance'] || 0
   ]);
 
-  const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+  const csv = [headers, ...rows].map(row => row.map(csvField).join(',')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
