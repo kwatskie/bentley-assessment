@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Bentley Saskatoon — Candidate Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FAF7F2;
+    --warm-white: #FFFDF9;
+    --gold: #B8963E;
+    --gold-light: #D4AF6A;
+    --gold-pale: #F5EDD8;
+    --charcoal: #2C2C2C;
+    --slate: #5A5A5A;
+    --muted: #8A8A8A;
+    --border: #E8E0D0;
+    --success: #4A7C59;
+    --danger: #8B3A3A;
+    --shadow: 0 4px 24px rgba(44,44,44,0.08);
+    --shadow-lg: 0 12px 48px rgba(44,44,44,0.14);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--charcoal);
+    min-height: 100vh;
+  }
+
+  /* ─── HEADER ─── */
+  .site-header {
+    background: var(--charcoal);
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 3px solid var(--gold);
+  }
+  .site-header .logo-mark {
+    width: 42px; height: 42px;
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    color: var(--gold);
+    font-size: 18px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .site-header h1 {
+    font-family: 'Playfair Display', serif;
+    color: var(--warm-white);
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .site-header p {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* ─── SCREENS ─── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ─── LANDING ─── */
+  .landing {
+    max-width: 680px; margin: 60px auto; padding: 0 24px;
+  }
+  .landing-card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 52px 56px;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
+  }
+  .landing-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold));
+  }
+  .landing-card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px; font-weight: 700;
+    color: var(--charcoal);
+    margin-bottom: 8px;
+  }
+  .landing-card .subtitle {
+    color: var(--gold);
+    font-size: 12px; font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .landing-card p {
+    color: var(--slate);
+    font-size: 15px; line-height: 1.7;
+    margin-bottom: 20px;
+  }
+  .info-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; margin: 28px 0;
+  }
+  .info-pill {
+    background: var(--gold-pale);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px; color: var(--charcoal);
+    font-weight: 500;
+  }
+  .info-pill span {
+    display: block; font-size: 11px;
+    color: var(--muted); font-weight: 400;
+    margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+
+  /* FORM FIELDS */
+  .field-group { margin-bottom: 18px; }
+  .field-group label {
+    display: block; font-size: 13px; font-weight: 600;
+    color: var(--slate); margin-bottom: 6px;
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .field-group input, .field-group select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px; color: var(--charcoal);
+    background: var(--warm-white);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .field-group input:focus, .field-group select:focus {
+    border-color: var(--gold);
+  }
+
+  /* BUTTONS */
+  .btn-primary {
+    background: var(--charcoal);
+    color: var(--warm-white);
+    border: none; border-radius: 8px;
+    padding: 14px 32px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px; font-weight: 600;
+    cursor: pointer; width: 100%;
+    letter-spacing: 0.04em;
+    transition: all 0.2s;
+    margin-top: 8px;
+  }
+  .btn-primary:hover {
+    background: var(--gold);
+    color: var(--charcoal);
+  }
+  .btn-gold {
+    background: var(--gold);
+    color: var(--charcoal);
+    border: none; border-radius: 8px;
+    padding: 14px 32px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px; font-weight: 600;
+    cursor: pointer; width: 100%;
+    letter-spacing: 0.04em;
+    transition: all 0.2s;
+    margin-top: 8px;
+  }
+  .btn-gold:hover { background: var(--gold-light); }
+
+  /* ─── ASSESSMENT ─── */
+  .assessment-layout {
+    max-width: 760px; margin: 0 auto; padding: 40px 24px 80px;
+  }
+
+  .progress-bar-wrap {
+    background: var(--border);
+    border-radius: 100px; height: 6px;
+    margin-bottom: 36px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    border-radius: 100px;
+    transition: width 0.4s ease;
+  }
+  .progress-meta {
+    display: flex; justify-content: space-between;
+    font-size: 12px; color: var(--muted); margin-bottom: 6px;
+    font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+
+  .section-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--gold-pale); border: 1px solid var(--border);
+    border-radius: 100px; padding: 6px 16px;
+    font-size: 11px; font-weight: 600; color: var(--gold);
+    text-transform: uppercase; letter-spacing: 0.1em;
+    margin-bottom: 20px;
+  }
+  .section-badge .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--gold);
+  }
+
+  .question-card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 36px 40px;
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+  }
+  .question-number {
+    font-size: 11px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px;
+  }
+  .question-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 19px; font-weight: 600; line-height: 1.5;
+    color: var(--charcoal); margin-bottom: 28px;
+  }
+
+  /* MCQ */
+  .options-list { display: flex; flex-direction: column; gap: 10px; }
+  .option-item {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 14px 18px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px; cursor: pointer;
+    transition: all 0.18s; position: relative;
+    background: var(--cream);
+  }
+  .option-item:hover { border-color: var(--gold-light); background: var(--gold-pale); }
+  .option-item.selected { border-color: var(--gold); background: var(--gold-pale); }
+  .option-item input[type="radio"] { display: none; }
+  .option-radio {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid var(--border);
+    flex-shrink: 0; margin-top: 1px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.18s;
+  }
+  .option-item.selected .option-radio { border-color: var(--gold); background: var(--gold); }
+  .option-item.selected .option-radio::after {
+    content: ''; display: block; width: 8px; height: 8px;
+    border-radius: 50%; background: white;
+  }
+  .option-label { font-size: 15px; color: var(--charcoal); line-height: 1.5; }
+
+  /* LIKERT */
+  .likert-scale {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;
+  }
+  .likert-label-row {
+    display: flex; justify-content: space-between;
+    font-size: 11px; color: var(--muted); margin-bottom: 10px;
+    font-weight: 500;
+  }
+  .likert-btn {
+    flex: 1; min-width: 44px;
+    padding: 12px 6px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 600;
+    color: var(--slate); background: var(--cream);
+    transition: all 0.18s; text-align: center;
+  }
+  .likert-btn:hover { border-color: var(--gold-light); color: var(--gold); }
+  .likert-btn.selected { border-color: var(--gold); background: var(--gold); color: white; }
+
+  /* NAV */
+  .nav-row {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 32px;
+  }
+  .btn-nav {
+    padding: 12px 28px; border-radius: 8px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+    border: 1.5px solid var(--border); background: var(--warm-white);
+    color: var(--slate); transition: all 0.18s;
+    letter-spacing: 0.04em;
+  }
+  .btn-nav:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-nav-next {
+    padding: 12px 32px; border-radius: 8px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+    border: none; background: var(--charcoal); color: white;
+    transition: all 0.18s; letter-spacing: 0.04em;
+  }
+  .btn-nav-next:hover { background: var(--gold); color: var(--charcoal); }
+  .btn-nav-next:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+
+  /* ─── THANK YOU ─── */
+  .thankyou {
+    max-width: 560px; margin: 80px auto; padding: 0 24px; text-align: center;
+  }
+  .thankyou-icon {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: var(--gold-pale); border: 2px solid var(--gold);
+    margin: 0 auto 28px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+  }
+  .thankyou h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px; font-weight: 700; margin-bottom: 16px;
+  }
+  .thankyou p { color: var(--slate); font-size: 16px; line-height: 1.7; }
+
+  /* ─── ADMIN LOGIN ─── */
+  .admin-login {
+    max-width: 420px; margin: 80px auto; padding: 0 24px;
+  }
+  .admin-card {
+    background: var(--warm-white);
+    border: 1px solid var(--border); border-radius: 14px;
+    padding: 44px 48px; box-shadow: var(--shadow-lg);
+    position: relative; overflow: hidden;
+  }
+  .admin-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, var(--charcoal), var(--gold));
+  }
+  .admin-card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px; margin-bottom: 6px;
+  }
+  .admin-card .sub { color: var(--muted); font-size: 13px; margin-bottom: 28px; }
+  .error-msg {
+    background: #FFF0F0; border: 1px solid #F5C2C2;
+    color: var(--danger); border-radius: 8px;
+    padding: 10px 14px; font-size: 13px; margin-top: 10px; display: none;
+  }
+
+  /* ─── ADMIN DASHBOARD ─── */
+  .admin-wrap {
+    max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px;
+  }
+  .admin-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 32px; flex-wrap: gap;
+  }
+  .admin-header h2 {
+    font-family: 'Playfair Display', serif; font-size: 28px;
+  }
+  .btn-sm {
+    padding: 8px 20px; border-radius: 8px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+    border: 1.5px solid var(--border); background: var(--warm-white);
+    color: var(--slate); transition: all 0.18s;
+  }
+  .btn-sm:hover { border-color: var(--gold); color: var(--gold); }
+
+  .results-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border); border-radius: 12px;
+    box-shadow: var(--shadow);
+  }
+  .results-table {
+    width: 100%; border-collapse: collapse;
+    font-size: 14px;
+  }
+  .results-table thead {
+    background: var(--charcoal); color: var(--warm-white);
+  }
+  .results-table thead th {
+    padding: 14px 16px; text-align: left;
+    font-weight: 600; font-size: 12px;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    white-space: nowrap;
+  }
+  .results-table tbody tr { border-bottom: 1px solid var(--border); }
+  .results-table tbody tr:last-child { border-bottom: none; }
+  .results-table tbody tr:nth-child(odd) { background: var(--warm-white); }
+  .results-table tbody tr:nth-child(even) { background: var(--cream); }
+  .results-table td {
+    padding: 13px 16px; color: var(--charcoal); vertical-align: top;
+  }
+  .results-table td.name { font-weight: 600; }
+
+  .score-pill {
+    display: inline-block;
+    padding: 3px 10px; border-radius: 100px;
+    font-size: 12px; font-weight: 600;
+  }
+  .score-high { background: #E8F5E9; color: #2E7D32; }
+  .score-mid  { background: #FFF8E1; color: #F57F17; }
+  .score-low  { background: #FFEBEE; color: #B71C1C; }
+
+  .detail-btn {
+    background: none; border: 1px solid var(--border);
+    border-radius: 6px; padding: 4px 12px;
+    font-size: 12px; cursor: pointer; color: var(--slate);
+    font-family: 'DM Sans', sans-serif; font-weight: 500;
+    transition: all 0.15s;
+  }
+  .detail-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(44,44,44,0.55); z-index: 100;
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--warm-white); border-radius: 16px;
+    padding: 40px; max-width: 680px; width: 100%;
+    max-height: 85vh; overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+  }
+  .modal-close {
+    position: absolute; top: 16px; right: 20px;
+    background: none; border: none; font-size: 20px;
+    cursor: pointer; color: var(--muted);
+  }
+  .modal h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px; margin-bottom: 4px;
+  }
+  .modal .meta { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+
+  .section-scores {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px; margin-bottom: 28px;
+  }
+  .score-block {
+    background: var(--cream); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px;
+    text-align: center;
+  }
+  .score-block .label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px;
+  }
+  .score-block .val {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px; font-weight: 700; color: var(--charcoal);
+  }
+  .score-block .max { font-size: 13px; color: var(--muted); }
+
+  .answer-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .answer-table th {
+    text-align: left; padding: 8px 10px;
+    border-bottom: 2px solid var(--border);
+    font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--muted);
+  }
+  .answer-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); color: var(--slate); vertical-align: top; }
+  .answer-table td:first-child { color: var(--charcoal); font-weight: 500; width: 40%; }
+
+  .ocean-bars { margin-top: 8px; }
+  .ocean-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .ocean-label { width: 130px; font-size: 13px; color: var(--slate); flex-shrink: 0; }
+  .ocean-track { flex: 1; background: var(--border); border-radius: 100px; height: 8px; }
+  .ocean-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
+  .ocean-score { width: 36px; text-align: right; font-size: 13px; font-weight: 600; color: var(--charcoal); }
+
+  .no-data {
+    text-align: center; padding: 60px 20px; color: var(--muted); font-size: 15px;
+  }
+  .no-data span { display: block; font-size: 36px; margin-bottom: 12px; }
+
+  @media (max-width: 600px) {
+    .landing-card, .question-card { padding: 28px 20px; }
+    .info-grid { grid-template-columns: 1fr; }
+    .section-scores { grid-template-columns: 1fr; }
+  }
+
+  /* NAV LINKS in header */
+  .header-nav { margin-left: auto; display: flex; gap: 12px; align-items: center; }
+  .header-link {
+    color: var(--muted); font-size: 12px; font-weight: 500;
+    text-decoration: none; text-transform: uppercase; letter-spacing: 0.08em;
+    cursor: pointer; transition: color 0.2s; background: none; border: none;
+  }
+  .header-link:hover { color: var(--gold); }
+  .header-link.accent {
+    border: 1px solid var(--gold); border-radius: 6px;
+    padding: 6px 14px; color: var(--gold);
+  }
+  .header-link.accent:hover { background: var(--gold); color: var(--charcoal); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="logo-mark">B</div>
+  <div>
+    <h1>The Bentley Saskatoon</h1>
+    <p>Candidate Assessment Portal</p>
+  </div>
+  <nav class="header-nav">
+    <button class="header-link" onclick="goToScreen('landing')">Assessment</button>
+    <button class="header-link accent" onclick="goToScreen('adminLogin')">Admin Login</button>
+  </nav>
+</header>
+
+<!-- ══════════════════════ SCREEN: LANDING ══════════════════════ -->
+<div id="screen-landing" class="screen active">
+  <div class="landing">
+    <div class="landing-card">
+      <div class="subtitle">Employment Assessment</div>
+      <h2>Candidate Evaluation</h2>
+      <p>Welcome to The Bentley Saskatoon's pre-employment assessment. This evaluation measures cognitive ability, emotional intelligence, and workplace personality fit — helping us build the best care team for our residents.</p>
+      <p>Please answer every question honestly. There are no "trick" questions. The assessment takes approximately <strong>15–20 minutes</strong>.</p>
+      <div class="info-grid">
+        <div class="info-pill"><span>Questions</span>41 — Personalized to Your Role</div>
+        <div class="info-pill"><span>Sections</span>3 (Cognitive · EQ · Personality)</div>
+        <div class="info-pill"><span>Time</span>~25–30 Minutes</div>
+        <div class="info-pill"><span>Results</span>Reviewed by Admin Only</div>
+      </div>
+      <div class="field-group">
+        <label>Full Name</label>
+        <input type="text" id="candidateName" placeholder="e.g. Maria Santos">
+      </div>
+      <div class="field-group">
+        <label>Position Applied For</label>
+        <select id="candidateRole">
+          <option value="">— Select a role —</option>
+          <option>Receptionist / Front Desk</option>
+          <option>Care Aide / PSW</option>
+          <option>Housekeeping / Maintenance</option>
+          <option>Department Manager / Supervisor</option>
+          <option>Server</option>
+          <option>Cook</option>
+        </select>
+      </div>
+      <button class="btn-primary" onclick="startAssessment()">Begin Assessment →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════ SCREEN: ASSESSMENT ══════════════════════ -->
+<div id="screen-assessment" class="screen">
+  <div class="assessment-layout">
+    <div class="progress-meta">
+      <span id="progressLabel">Question 1 of 28</span>
+      <span id="sectionLabel">Section 1: Cognitive Ability</span>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressFill" style="width:4%"></div>
+    </div>
+    <div id="questionContainer"></div>
+    <div class="nav-row">
+      <button class="btn-nav" id="btnBack" onclick="navigate(-1)">← Back</button>
+      <button class="btn-nav-next" id="btnNext" onclick="navigate(1)">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════ SCREEN: THANK YOU ══════════════════════ -->
+<div id="screen-thankyou" class="screen">
+  <div class="thankyou">
+    <div class="thankyou-icon">✓</div>
+    <h2>Assessment Complete</h2>
+    <p>Thank you for completing The Bentley's candidate evaluation. Your responses have been recorded and will be reviewed by our management team. We appreciate your time and interest in joining our community.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════ SCREEN: ADMIN LOGIN ══════════════════════ -->
+<div id="screen-adminLogin" class="screen">
+  <div class="admin-login">
+    <div class="admin-card">
+      <h2>Admin Access</h2>
+      <p class="sub">Results are restricted to authorized personnel only.</p>
+      <div class="field-group">
+        <label>Admin Password</label>
+        <input type="password" id="adminPassword" placeholder="Enter password" onkeydown="if(event.key==='Enter')adminLogin()">
+      </div>
+      <button class="btn-primary" onclick="adminLogin()">Access Results →</button>
+      <div class="error-msg" id="loginError">Incorrect password. Please try again.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════ SCREEN: ADMIN DASHBOARD ══════════════════════ -->
+<div id="screen-adminDashboard" class="screen">
+  <div class="admin-wrap">
+    <div class="admin-header">
+      <h2>Candidate Results</h2>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn-sm" onclick="exportCSV()">Export CSV</button>
+        <button class="btn-sm" onclick="clearResults()">Clear All</button>
+        <button class="btn-sm" onclick="adminLogout()">Log Out</button>
+      </div>
+    </div>
+    <div id="resultsContent"></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════
+// QUESTION BANKS — Role-personalized (41 questions per candidate)
+// Structure: 5 shared cognitive + 10 role cognitive
+//            + 5 shared EQ + 11 role EQ
+//            + 10 personality (universal)
+// ══════════════════════════════════════════════════════════════════════
+
+// ─── SHARED COGNITIVE (5) — pure logic, all roles ───
+const SHARED_COGNITIVE = [
+  {
+    section: 'Cognitive Ability', type: 'mcq',
+    text: 'What comes next in this sequence? 3, 6, 12, 24, ___',
+    options: ['30', '36', '48', '42'],
+    correct: 2, scoring: 'cognitive'
+  },
+  {
+    section: 'Cognitive Ability', type: 'mcq',
+    text: 'Which word does NOT belong with the others?',
+    options: ['Patience', 'Empathy', 'Aggression', 'Compassion'],
+    correct: 2, scoring: 'cognitive'
+  },
+  {
+    section: 'Cognitive Ability', type: 'mcq',
+    text: 'If all nurses are caregivers, and some caregivers are managers, which statement must be true?',
+    options: ['Some nurses are managers', 'All managers are nurses', 'Some caregivers are nurses', 'No nurses are managers'],
+    correct: 2, scoring: 'cognitive'
+  },
+  {
+    section: 'Cognitive Ability', type: 'mcq',
+    text: 'A supply order costs $240. If the residence receives a 15% discount, what is the final cost?',
+    options: ['$204', '$216', '$220', '$196'],
+    correct: 0, scoring: 'cognitive'
+  },
+  {
+    section: 'Cognitive Ability', type: 'mcq',
+    text: 'Which of the following best describes "confidentiality" in a workplace setting?',
+    options: ['Sharing personal information freely with all colleagues', 'Keeping personal and sensitive information private and secure', 'Posting information on a common notice board', 'Allowing anyone to review personal records on request'],
+    correct: 1, scoring: 'cognitive'
+  },
+];
+
+// ─── ROLE-SPECIFIC COGNITIVE (10 per role) ───
+const ROLE_COGNITIVE = {
+
+  'Care Aide / PSW': [
+    { section: 'Cognitive Ability', type: 'mcq', text: 'A care aide works 8-hour shifts. She works 5 days this week and 3 days next week. How many total hours does she work over the two weeks?', options: ['56 hours', '64 hours', '72 hours', '48 hours'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'A medication is given every 6 hours. If the last dose was at 8:00 AM, when is the next dose due?', options: ['12:00 PM', '2:00 PM', '6:00 PM', '10:00 AM'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'A dining room serves lunch from 11:30 AM to 1:30 PM. Residents are seated in 3 equal shifts. How long is each shift?', options: ['30 minutes', '40 minutes', '45 minutes', '50 minutes'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'The facility allocates $12 per resident per day for meals. With 40 residents, how much is spent per week?', options: ['$480', '$840', '$3,360', '$1,200'], correct: 2, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'A policy states: "Document all falls within 30 minutes. Use the pink form for falls with injury, blue for falls without injury. Both require a witness signature." A resident falls at 2:15 PM with minor bruising. What do you do?', options: ['Use the blue form since the bruising is minor', 'Use the pink form, document the injury, get a witness signature, and submit by 2:45 PM', 'Wait until end of shift to document', 'Only document if the resident reports pain'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'A care protocol requires vital sign checks before meals for residents over 75 OR those on blood pressure medication. Which residents must be checked?', options: ['Only those over 75', 'Only those on blood pressure medication', 'Any resident meeting either condition', 'All residents without exception'], correct: 2, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'Resident is to Care Aide as Patient is to ___?', options: ['Hospital', 'Nurse', 'Doctor', 'Medicine'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'A policy states: "If a resident refuses medication, document it and notify the charge nurse within 15 minutes. If the resident changes their mind within the same shift, the dose may be given with updated documentation." A resident refuses their 10:00 AM medication. What is the correct action?', options: ['Administer it anyway since it is prescribed', 'Document the refusal and notify the charge nurse within 15 minutes', 'Wait until the next scheduled dose without documenting', 'Ask their family for permission to override'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'Your facility requires written reminders for all memory-impaired residents. A new resident has been diagnosed with memory loss. What must be true about their care plan?', options: ['They will refuse to read the reminders', 'They must receive written reminders per policy', 'They must live in a specialized memory care unit', 'Their family must approve all reminders first'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'You have 5 residents needing lunch help: 3 need full feeding (12 min each) and 2 need only setup (5 min each). You have 50 minutes. Which approach is most efficient?', options: ['Feed all 3 first, then set up the other 2', 'Set up both first (10 min), then feed all 3 (36 min)', 'Alternate between feeding and setup', 'Feed 2 while setting up 1, then finish the rest'], correct: 1, scoring: 'cognitive' },
+  ],
+
+  'Receptionist / Front Desk': [
+    { section: 'Cognitive Ability', type: 'mcq', text: 'The reception desk welcomed 135 visitors over 15 working days. What is the average number of visitors per day?', options: ['7', '9', '11', '45'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'The reception desk is staffed from 8:00 AM to 8:00 PM. Three receptionists share equal shifts with no overlap. How long is each shift?', options: ['3 hours', '4 hours', '5 hours', '6 hours'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'A policy states: "Return family calls within 2 hours. Medical-related calls must be directed to a nurse immediately. General inquiries may be queued for end of day." A family member calls saying their parent has not been answering their phone. What do you do?', options: ['Queue it as a general inquiry', 'Take a message and return the call within 2 hours', 'Direct the caller to a nurse since it could be medical', 'Tell them to call back during business hours'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'You need to file these resident files alphabetically by last name: Torres, MacLeod, Ng, Bautista. What is the correct order?', options: ['Bautista, MacLeod, Ng, Torres', 'Bautista, Ng, MacLeod, Torres', 'Ng, MacLeod, Bautista, Torres', 'Torres, Ng, MacLeod, Bautista'], correct: 0, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'Receptionist is to Visitor as Server is to ___?', options: ['Restaurant', 'Resident', 'Kitchen', 'Manager'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'Office supplies cost $360. The facility receives a 20% discount. What is the final cost?', options: ['$288', '$296', '$300', '$320'], correct: 0, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'You have appointments from 10:00 AM to 12:00 PM. Each takes 25 minutes with a 10-minute gap between them. How many appointments fit?', options: ['2', '3', '4', '5'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'Your policy states: "All visitors must sign the visitor log and show ID. Regular family visitors are not exempt even if known to staff." A family member you recognize well says she visits every day and does not need to sign in. What do you do?', options: ['Let her through since you know her', 'Politely explain the policy applies to all visitors and ask her to sign in', 'Ask your supervisor for an exception', 'Let her in but note it'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'What comes next? 5, 10, 20, 40, ___', options: ['60', '70', '80', '50'], correct: 2, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'A visitor is upset about a billing issue and demands to speak with management. Your manager is in a confidential meeting. What is the correct action?', options: ['Interrupt the meeting', 'Tell the visitor to come back later', 'Take the visitor\'s contact info, apologize for the wait, and have the manager call back promptly', 'Handle the billing dispute yourself'], correct: 2, scoring: 'cognitive' },
+  ],
+
+  'Housekeeping / Maintenance': [
+    { section: 'Cognitive Ability', type: 'mcq', text: 'A cleaning solution requires 1 part bleach to 9 parts water. To make 5 litres of solution, how much bleach do you need?', options: ['0.5 litres', '1 litre', '1.5 litres', '0.25 litres'], correct: 0, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'You need to clean 12 rooms. Each room takes 25 minutes. How long will this take in total?', options: ['4 hours', '5 hours', '3 hours', '2 hours 30 minutes'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'An infection control policy states: "All high-touch surfaces must be disinfected every 4 hours. Any room where a resident has been ill must be deep-cleaned before the next resident." A resident who had a cold was just discharged. What should you do?', options: ['Do a standard clean since a cold is minor', 'Deep-clean the room before it is used by the next resident', 'Disinfect high-touch surfaces only', 'Wait for the next scheduled cleaning'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'You have 36 bottles of floor cleaner. Each day requires 4 bottles. How many full days of supply do you have?', options: ['8 days', '9 days', '10 days', '7 days'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'All cleaning products must be stored in locked storage areas. Some cleaning products are flammable. Which statement must be true?', options: ['All flammable products are stored in locked areas', 'No cleaning products are flammable', 'Some locked areas contain only non-flammable items', 'Flammable items do not need to be locked'], correct: 0, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'Mop is to Floor as Vacuum is to ___?', options: ['Water', 'Carpet', 'Cleaning', 'Bucket'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'A chemical container has a skull-and-crossbones symbol on the label. This means the product is ___?', options: ['Flammable', 'Corrosive', 'Toxic', 'An irritant'], correct: 2, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'What comes next? 100, 90, 80, 70, ___', options: ['55', '65', '60', '75'], correct: 2, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'A policy states: "If a hazard poses an immediate safety risk, do not leave the area unattended until a warning sign is in place or help has arrived." You find a broken tile in a hallway residents use regularly. What do you do?', options: ['Note it on your log and continue your route', 'Place a warning sign, report it to maintenance, and ensure the area is safe before leaving', 'Wait until a supervisor walks by', 'Fix it yourself with supplies from your cart'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'When entering a resident\'s room for housekeeping, what is always required regardless of whether the door is open?', options: ['Nothing if the door is already open', 'Knock, identify yourself, and wait for a response before entering', 'Only knock if the resident is known to be inside', 'Only required if the resident has specifically requested it'], correct: 1, scoring: 'cognitive' },
+  ],
+
+  'Department Manager / Supervisor': [
+    { section: 'Cognitive Ability', type: 'mcq', text: 'Your department has an annual budget of $180,000. What is the monthly allocation?', options: ['$12,000', '$15,000', '$18,000', '$20,000'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'Your unit requires 5 staff per day. Over a 7-day week, 3 staff called in sick on different days. How many of the 35 required staff-days were actually filled?', options: ['28', '30', '32', '35'], correct: 2, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'Your department\'s target score is 95%. Last month\'s actual score was 82%. What is the performance gap?', options: ['10 percentage points', '13 percentage points', '15 percentage points', '17 percentage points'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'A policy states: "PIPs must be initiated within 5 business days of a documented incident. A second incident within 90 days triggers an automatic review." An incident is documented on Monday. By when must the PIP be initiated?', options: ['By the following Monday', 'Within 5 calendar days', 'By the following Friday (5 business days)', 'Within 10 business days if HR is unavailable'], correct: 2, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'You have 4 staff: two need Saturdays off, one needs Sundays off, one is available all 7 days. You need at least 2 staff per day on weekends. Can you meet this requirement?', options: ['No — you do not have enough weekend staff', 'Yes — you have 2 available Saturday and 3 available Sunday', 'Yes but only if staff work overtime', 'No — at least one staff will need to work both weekend days involuntarily'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'Manager is to Staff as Director is to ___?', options: ['Residents', 'Manager', 'Board', 'Supervisor'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'What comes next? 2, 6, 18, 54, ___', options: ['108', '162', '72', '216'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'All managers must complete monthly safety audits. Some managers also conduct staff performance reviews. Which must be true?', options: ['All managers who conduct reviews also complete safety audits', 'Some managers do not complete safety audits', 'No managers do both audits and reviews', 'All performance reviews are done by safety auditors'], correct: 0, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'A discipline policy states: "Verbal warning for first offence. Written warning for second offence within 12 months. Suspension for third offence within 12 months of the first." An employee got a verbal warning in January and a written warning in September. They commit a third violation in November. What is the appropriate action?', options: ['Another written warning', 'Verbal warning since enough time has passed', 'Suspension — third offence within 12 months of the first', 'Termination — any third offence requires it'], correct: 2, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'You have these tasks: (A) respond to a family complaint within 24 hours, (B) file an incident report due by end of today\'s shift per policy, (C) schedule coverage for tomorrow\'s understaffed shift, (D) complete a monthly report due in 3 days. Which is highest priority?', options: ['A — family complaints affect reputation most', 'B — the incident report has an immediate legal deadline today', 'C — tomorrow\'s staffing protects resident safety', 'D — the monthly report requires the most preparation'], correct: 1, scoring: 'cognitive' },
+  ],
+
+  'Server': [
+    { section: 'Cognitive Ability', type: 'mcq', text: 'A soup recipe makes 12 servings. You need to serve 48 residents. By how much must you multiply the recipe?', options: ['2', '3', '4', '6'], correct: 2, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'Breakfast is served from 7:30 AM to 9:00 AM. Residents are seated in 3 equal sittings. How long is each sitting?', options: ['20 minutes', '25 minutes', '30 minutes', '35 minutes'], correct: 2, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'Which food contains gluten and must NOT be served to a resident with celiac disease?', options: ['Rice', 'Potato', 'Barley bread', 'Corn'], correct: 2, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'A policy states: "If a resident\'s tray is unlabelled but the resident claims to have a food allergy, serve only water and notify the dietitian immediately." A resident says they are allergic to peanuts but their tray has no allergy label. What do you do?', options: ['Serve the tray since the kitchen prepared it safely', 'Serve it but tell the resident to avoid peanuts', 'Serve only water and notify the dietitian immediately', 'Check the ingredients yourself and decide if it is safe'], correct: 2, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'All residents with diabetes must receive sugar-free desserts. Mrs. Chen has diabetes. What must be true?', options: ['Mrs. Chen may choose a regular dessert if she prefers', 'Mrs. Chen must receive a sugar-free dessert', 'Sugar-free desserts are optional for all residents', 'Mrs. Chen only needs sugar-free desserts if she requests it'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'Menu is to Server as Care Plan is to ___?', options: ['Doctor', 'Resident', 'Care Aide', 'Nurse'], correct: 2, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'What comes next? 15, 30, 45, 60, ___', options: ['70', '75', '80', '90'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'Each meal costs $8.50 to prepare. How much does it cost to serve 3 meals a day to 40 residents for one week?', options: ['$7,140', '$3,570', '$1,020', '$2,380'], correct: 0, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'A policy states: "Hold a missing resident\'s tray for 15 minutes before returning it to the kitchen." A resident who normally sits at table 3 has not arrived 5 minutes into the meal. What do you do?', options: ['Return the tray to the kitchen immediately', 'Hold the tray for up to 15 minutes and check on the resident if they have not arrived', 'Give the tray to another resident who asks for more food', 'Discard the tray after 5 minutes since the food will get cold'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'Hot food must be kept at or above 60°C during service. A hot dish reads 52°C on the temperature check. What should you do?', options: ['Serve it since it is close enough', 'Return it to the kitchen and do not serve it until it reaches safe temperature', 'Add heat packs and serve immediately', 'Serve it to residents without health conditions only'], correct: 1, scoring: 'cognitive' },
+  ],
+
+  'Cook': [
+    { section: 'Cognitive Ability', type: 'mcq', text: 'A cake recipe calls for 2.5 cups of flour and makes 20 servings. You need 60 servings. How much flour do you need?', options: ['5 cups', '6 cups', '7.5 cups', '8 cups'], correct: 2, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'Food safety standards require poultry to reach a minimum internal temperature of 74°C. A chicken breast reads 68°C. What do you do?', options: ['Serve it since it is close enough', 'Return it to heat and cook until it reaches at least 74°C before serving', 'Let it rest — the temperature will rise on its own', 'Serve it only to residents who requested well-done'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'You have 3 dishes to prepare: 45 minutes, 30 minutes, and 25 minutes each. All must be ready by 12:00 PM and you work sequentially. What is the latest start time?', options: ['10:20 AM', '10:30 AM', '10:40 AM', '11:00 AM'], correct: 0, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'You have 48 kg of rice in stock. Each day requires 6 kg. How many full days of supply do you have?', options: ['6 days', '7 days', '8 days', '9 days'], correct: 2, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'All food containing raw eggs must be cooked to at least 71°C. A hollandaise sauce contains raw eggs. Which must be true?', options: ['Hollandaise sauce must be cooked to at least 71°C', 'Hollandaise sauce cannot be served to residents', 'Raw eggs only need 60°C when mixed into a sauce', 'The 71°C rule applies only to meat dishes'], correct: 0, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'Recipe is to Cook as Care Plan is to ___?', options: ['Doctor', 'Resident', 'Care Aide', 'Medication'], correct: 2, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'You spend $180 on ingredients for a dish that makes 60 servings. What is the cost per serving?', options: ['$2.50', '$3.00', '$3.50', '$4.00'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'A policy states: "Colour-coded meal tickets indicate allergies: Red = nut, Yellow = gluten, Green = dairy-free. If a ticket colour does not match the prepared dish, do not serve and notify the dietitian." You are about to serve pasta to a resident with a yellow ticket. What do you do?', options: ['Serve the pasta since it is the scheduled meal', 'Do not serve the pasta — yellow means gluten intolerance and pasta contains gluten — notify the dietitian', 'Remove the pasta and serve only the side dishes', 'Ask the resident if they are comfortable eating pasta today'], correct: 1, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'What comes next? 4, 8, 16, 32, ___', options: ['48', '56', '64', '72'], correct: 2, scoring: 'cognitive' },
+    { section: 'Cognitive Ability', type: 'mcq', text: 'A resident is on a high-protein, low-carbohydrate diet. Which meal is most appropriate?', options: ['White rice with steamed vegetables', 'Grilled salmon with green beans', 'Macaroni and cheese', 'Oatmeal with brown sugar'], correct: 1, scoring: 'cognitive' },
+  ],
+};
+
+// ─── SHARED EQ (5) — universal workplace values, all roles ───
+const SHARED_EQ = [
+  {
+    section: 'Emotional Intelligence', type: 'sjt',
+    text: 'A coworker snaps at you in front of a resident due to stress. How do you respond?',
+    options: ['Snap back immediately to defend yourself', 'Ignore it and bring it up loudly at the next team meeting', 'Stay calm in front of the resident and address it with your coworker privately later', 'Report them to the manager right away without speaking to them first'],
+    correct: 2, scoring: 'eq'
+  },
+  {
+    section: 'Emotional Intelligence', type: 'sjt',
+    text: 'You receive critical feedback from your supervisor about your performance. What is the healthiest response?',
+    options: ['Defend yourself immediately and list everything you have done well', 'Feel embarrassed and avoid your supervisor for the rest of the week', 'Listen, ask clarifying questions, thank them, and create a plan to improve', 'Agree with everything said even if you strongly disagree'],
+    correct: 2, scoring: 'eq'
+  },
+  {
+    section: 'Emotional Intelligence', type: 'sjt',
+    text: 'Two colleagues are arguing loudly and the conflict is visible to residents. You are passing by. What do you do?',
+    options: ['Stop to watch and decide who is right', 'Calmly ask both to lower their voices and move to a private area', 'Join the argument to help one side', 'Walk past and pretend you did not see it'],
+    correct: 1, scoring: 'eq'
+  },
+  {
+    section: 'Emotional Intelligence', type: 'sjt',
+    text: 'You have had a very difficult personal day. Your shift starts in 30 minutes. What is the most professional approach?',
+    options: ['Call in sick even though you are physically well', 'Arrive and vent to the first coworker you see', 'Set your personal issues aside, focus on your duties, and seek support after your shift', 'Let those around you know you are having a bad day so they understand'],
+    correct: 2, scoring: 'eq'
+  },
+  {
+    section: 'Emotional Intelligence', type: 'sjt',
+    text: 'During a busy shift, you realize you made a minor documentation error. No harm was caused. What do you do?',
+    options: ['Hope no one notices and move on', 'Wait until your next shift to correct it', 'Correct it immediately, document the change, and inform your supervisor', 'Ask a coworker to fix it without telling anyone'],
+    correct: 2, scoring: 'eq'
+  },
+];
+
+// ─── ROLE-SPECIFIC EQ (11 per role) ───
+const ROLE_EQ = {
+
+  'Care Aide / PSW': [
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A resident becomes very upset and starts crying when you bring her medication. She says she misses her family. What is the BEST response?', options: ['Tell her to take the medication first, then you can talk', 'Sit with her, acknowledge her feelings, and give her a moment before proceeding', 'Immediately call her family on her behalf', 'Note it in the log and continue your rounds'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A new resident refuses your help getting dressed, saying "I can do it myself." What is the appropriate response?', options: ['Insist on helping because it is your job', 'Respect their autonomy, stay nearby, and offer support if needed', 'Leave and do not return until your next round', 'Tell them they will have to do it your way for safety'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A resident with dementia accuses you of stealing their watch, which you did not take. They are very distressed. How do you respond?', options: ['Insist you did not steal it and ask them to stop making false accusations', 'Validate their feelings, avoid arguing about the facts, and help them look for the item or offer comfort', 'Tell them they are confused and will forget about it', 'Ignore the accusation and continue with care tasks'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A family member of a resident angrily accuses you of neglecting their loved one. You know this is untrue. What is the BEST first step?', options: ['Firmly tell them they are wrong and walk away', 'Stay calm, listen without interrupting, and offer to involve your supervisor', 'Immediately call security', 'Promise to change everything to make them happy'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A resident becomes physically aggressive during personal care — hitting and shouting. This has never happened before. What is your FIRST priority?', options: ['Restrain them physically to maintain control', 'Stop care, ensure safety, step back, and call for help immediately', 'Continue care while ignoring the behaviour so it does not escalate', 'Ask the resident why they are behaving this way'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A resident calls you by the wrong name repeatedly. What is the best response?', options: ['Correct them sternly every time', 'Gently introduce yourself each time without making them feel embarrassed', 'Ignore it and answer to any name they use', 'Tell their family to fix the problem'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'You notice you are feeling impatient with a resident who keeps repeating the same question for the fifth time. What is the most self-aware response?', options: ['Answer quickly and dismiss them to hide your frustration', 'Tell the resident their memory problem is affecting everyone', 'Recognize your impatience, take a breath, and respond with the same patience as the first time', 'Ask another staff member to take over'], correct: 2, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'You notice a resident has become unusually withdrawn and quiet over the past two days. What do you do?', options: ['Assume they are just tired and do nothing', 'Document the change and inform your supervisor', 'Ask the resident directly if they are depressed', 'Increase their activities without consulting anyone'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'You are working alone. One resident falls, another has chest pain, and a third calls for help with a bathroom emergency. What do you do?', options: ['Help the resident who called first', 'Respond to the loudest resident', 'Assess the resident with chest pain first (potential medical emergency), call for help, then attend to others by urgency', 'Treat all three equally and respond slowly to avoid panic'], correct: 2, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'You notice a trusted coworker taking small facility items home. You are unsure if this is permitted. What is the most professional response?', options: ['Ignore it — they probably have permission', 'Tell other staff members about what you saw', 'Privately ask your coworker about it, or report it to your supervisor for clarification', 'Report them to the director immediately without speaking to them first'], correct: 2, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A resident says to you: "I don\'t see the point in living anymore." What is the MOST important next step?', options: ['Tell them things will get better and change the subject', 'Take it seriously, stay calm, listen, and immediately report it to your supervisor or nurse', 'Assume they are just venting and continue your tasks', 'Call their family right away without informing your supervisor'], correct: 1, scoring: 'eq' },
+  ],
+
+  'Receptionist / Front Desk': [
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A family member arrives at the desk visibly angry, demanding to see the manager immediately about a care complaint. The manager is not available. What is your BEST response?', options: ['Tell them the manager is busy and to come back', 'Remain calm, acknowledge their concern, take their details, and assure them the manager will follow up promptly', 'Argue that care standards are excellent', 'Call security immediately'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A regular visitor tries to walk past the desk without signing in, saying "I always skip this, everyone knows me." What do you do?', options: ['Let them pass since they are a regular', 'Politely but firmly remind them the policy applies to everyone and ask them to sign in', 'Report them to management immediately', 'Ignore it since they are clearly harmless'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A family member calls complaining about a specific staff member by name, saying they were rude. What is the appropriate response?', options: ['Defend the staff member and say it is unlikely', 'Tell the caller it is not your department to handle', 'Listen without judgment, take notes, acknowledge the concern, and route it to the appropriate supervisor', 'Immediately tell the staff member about the complaint'], correct: 2, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A resident\'s adult child asks you at the front desk for details about their parent\'s medication. What should you do?', options: ['Share the information since they are family', 'Explain that medical information is confidential and direct them to the nursing staff', 'Look it up in the system and tell them what you find', 'Tell them to ask the resident directly'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A visitor is sitting in the lobby visibly crying. They are not causing a disturbance. What do you do?', options: ['Wait to see if they calm down', 'Approach gently, ask if they are okay, and offer assistance or a private space', 'Call security to manage the situation', 'Ignore it since it is not part of your job'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A family member calls with a concern that is beyond your scope to resolve. What do you do?', options: ['Make up an answer to reassure them', 'Apologize, explain you do not have that information, and transfer them to the right person', 'Take a message and hope someone else handles it', 'Tell them to call back when you have more information'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A staff member asks you to tell the manager they arrived on time when they did not. What do you do?', options: ['Agree since it is a small favour', 'Politely decline and explain that you cannot falsify records', 'Tell the manager immediately about the request', 'Agree but feel uncomfortable about it'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A visitor becomes verbally abusive at the front desk, raising their voice and using offensive language. What is your BEST first response?', options: ['Match their tone to show you will not be pushed around', 'Stay calm, speak quietly and firmly, and offer to find a private space to resolve their concern', 'Call security immediately without addressing the visitor', 'Walk away from the desk'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'You notice a visitor taking photos in a hallway near residents\' rooms. What do you do?', options: ['Assume they are just photographing the building', 'Approach calmly, remind them photography in resident areas is not permitted, and ask them to stop', 'Call the police immediately', 'Report it to a coworker and let them handle it'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A family member calls your desk every hour asking for updates on their parent. The calls are disrupting your work. What is the most professional response?', options: ['Stop answering their calls', 'Speak with them kindly, explain the impact of frequent calls, and arrange a scheduled daily update', 'Transfer all their calls to a nurse', 'Tell them to stop calling or you will escalate it'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A delivery person insists they have delivered here many times and does not need to follow the sign-in procedure. What do you do?', options: ['Let them in since they are a known delivery person', 'Explain that the sign-in procedure applies to everyone regardless of visit frequency, and ask them to comply', 'Let them in and note it for next time', 'Call the delivery company to confirm their identity before deciding'], correct: 1, scoring: 'eq' },
+  ],
+
+  'Housekeeping / Maintenance': [
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A resident politely but firmly asks you not to clean their room today. What do you do?', options: ['Clean it anyway since it is required by your schedule', 'Respect their request, note it, and inform your supervisor so the resident\'s needs are addressed', 'Argue that the cleaning is mandatory for hygiene', 'Skip the room and say nothing to anyone'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'While cleaning, you find what appears to be a valuable piece of jewellery under a resident\'s bed. What do you do?', options: ['Leave it where it is', 'Pocket it temporarily to keep it safe', 'Document what you found, note the location, and hand it in to your supervisor or nursing station', 'Place it on the dresser and say nothing'], correct: 2, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'While cleaning a room, you notice a resident seems confused, distressed, and is searching frantically. What do you do?', options: ['Continue cleaning and let care staff handle it', 'Pause your work, calmly acknowledge the resident, and alert a care aide or nurse right away', 'Ask the resident what is wrong and try to solve it yourself', 'Leave the room to avoid disturbing them'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A staff member speaks rudely to you in front of residents, criticizing your work. What is the most professional response?', options: ['Argue back immediately', 'Stay calm in front of the residents and address the behaviour privately with the staff member or supervisor later', 'Complain to other staff members', 'Report them immediately to management'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'You accidentally knock over and break a small decorative item belonging to a resident. No one saw it. What do you do?', options: ['Discard it and hope the resident does not notice', 'Leave it broken so it looks like an unrelated accident', 'Report it honestly to your supervisor so the resident and family can be informed appropriately', 'Try to fix it with glue and say nothing'], correct: 2, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A friendly resident begins following you and trying to help you clean their room. They enjoy it but it is slowing you down. What do you do?', options: ['Tell them firmly they are not allowed to help', 'Find a safe, simple task they can assist with and engage them warmly while managing your time', 'Ignore them and work around them', 'Leave and come back when they are gone'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'You notice a leaking pipe in a hallway outside your maintenance area. No warning sign is in place and residents are nearby. What do you do?', options: ['Ignore it since it is not your department', 'Place a warning sign if available, inform the appropriate department, and stay nearby if residents are at risk', 'Wait until you see a maintenance worker and tell them verbally', 'Report it at the end of your shift in your log'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'While cleaning, a family member approaches and asks about their relative\'s health and medications. What do you do?', options: ['Share what you know since they are family', 'Explain you are not in a position to discuss resident health and direct them to nursing staff', 'Tell them you do not know anything', 'Walk away without responding'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'Due to a complex deep-cleaning task, you are running significantly behind your schedule. What is the best response?', options: ['Rush through remaining rooms and cut corners to catch up', 'Notify your supervisor about the delay and ask for guidance on prioritization', 'Skip lower-priority rooms without telling anyone', 'Stay late without informing your supervisor'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'You notice a colleague skipping required disinfection steps. What do you do?', options: ['Mind your own business since it is their responsibility', 'Report them to management immediately without speaking to them first', 'Speak to them privately and respectfully about the procedure, and report it if the behaviour continues', 'Do their disinfection steps for them without saying anything'], correct: 2, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'While cleaning, you overhear a staff member speaking mockingly about a resident\'s personal situation. What do you do?', options: ['Ignore it since you are not in a supervisory role', 'Join the conversation to gather more information', 'Raise it with your supervisor, as this relates to resident dignity and may violate policy', 'Tell the resident what you heard'], correct: 2, scoring: 'eq' },
+  ],
+
+  'Department Manager / Supervisor': [
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A staff member comes to your office in tears, saying she is overwhelmed and cannot cope with her workload. What is your BEST first response?', options: ['Tell her to take the rest of the day off and figure it out', 'Acknowledge her feelings, listen without judgment, and work together to identify immediate support', 'Tell her everyone finds the job hard and she needs to push through', 'Immediately call HR without speaking to her first'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'Two staff members have an ongoing conflict visibly affecting team morale and performance. What is the most effective approach?', options: ['Let them work it out on their own', 'Take sides with the staff member you trust more', 'Meet with each individually, then together if appropriate, and establish clear expectations', 'Immediately involve HR and document everything before speaking with either person'], correct: 2, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A family submits a formal complaint about one of your staff. You believe it may be based on a misunderstanding. What do you do?', options: ['Defend your staff member since you trust them', 'Dismiss the complaint since families sometimes overreact', 'Take it seriously, investigate impartially, speak with the staff member, and respond to the family professionally', 'Apologize to the family and discipline the staff member before completing the investigation'], correct: 2, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'You need to deliver difficult performance feedback to a staff member who has worked at the facility for 15 years and is well-liked. How do you approach it?', options: ['Avoid the conversation to protect morale', 'Deliver the feedback clearly and respectfully, focusing on behaviour and impact, not personality or tenure', 'Ask HR to deliver the feedback so it does not affect your relationship', 'Hint at the issue indirectly and hope they pick it up'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A staff member calls in sick 30 minutes before their shift, leaving a critical care gap you cannot fill. What do you do?', options: ['Leave the gap unfilled and hope remaining staff manage', 'Inform your supervisor immediately, adjust assignments to cover critical tasks, and document the situation', 'Blame the absent staff member in front of the team', 'Ask residents to wait longer without explanation'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'You discover evidence that a staff member has been falsifying daily care documentation. What is the appropriate response?', options: ['Confront them privately and give them a chance to correct it before reporting', 'Ignore it since they are generally a good employee', 'Report it immediately to your supervisor and HR — this is a serious breach of care standards', 'Remove the falsified records and replace them quietly'], correct: 2, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A resident tells you they feel their dignity is not being respected during personal care. They seem reluctant to name specific staff. What do you do?', options: ['Assure them it will not happen again without investigating', 'Take the complaint seriously, reassure the resident, investigate discreetly, and follow up with the resident and team', 'Tell the resident they need to be more specific before you can act', 'Attribute it to a personality clash and do nothing'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A new employee is struggling significantly after 3 weeks of training, despite appearing motivated. What is the most effective response?', options: ['Extend their probation without giving feedback', 'Meet with them, identify specific challenges, provide additional support or mentoring, and set clear expectations', 'Let them know they are failing and may be let go', 'Assign them to easier tasks permanently'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'You are asked to enforce a new policy your team disagrees with. You also have reservations. What do you do?', options: ['Tell your team you also disagree and enforce it reluctantly', 'Ignore the policy until the team is ready to accept it', 'Communicate it clearly and professionally, present the rationale, acknowledge concerns, and enforce it consistently', 'Escalate your reservations before communicating anything to the team'], correct: 2, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A staff member accuses a colleague of bullying. Both are good performers and well-liked. What is the first step?', options: ['Tell both to resolve it between themselves', 'Immediately suspend the accused pending investigation', 'Take the complaint seriously, listen to the reporting staff member privately, and begin a fair investigation', 'Ask other staff members who they think is right'], correct: 2, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'You are dealing with significant personal stress and notice it affecting your patience and decision-making at work. What is the most professional response?', options: ['Pretend everything is fine so the team is not affected', 'Take it out on the team since they must understand the pressure you are under', 'Manage your responses carefully, seek available support, and consider speaking with your own supervisor', 'Cancel all meetings and reduce your hours until you feel better'], correct: 2, scoring: 'eq' },
+  ],
+
+  'Server': [
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A resident complains every meal that the food is terrible and blames you personally. What is the best response?', options: ['Tell them the food is actually good and they should be grateful', 'Acknowledge their feelings, apologize for their dissatisfaction, ask what they would prefer, and pass feedback to the kitchen', 'Avoid their table to reduce complaints', 'Defend the kitchen staff and tell the resident to speak to management'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A resident accidentally knocks their entire meal tray to the floor and becomes visibly embarrassed. What do you do?', options: ['Draw attention to it so others can help', 'React with visible frustration since it creates extra work', 'React calmly and reassuringly, clean it up without making the resident feel worse, and arrange a fresh tray', 'Tell them to be more careful next time'], correct: 2, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A resident with dementia insists they have not had breakfast yet, though you served them 20 minutes ago. They are upset. What is the best response?', options: ['Show them proof they already ate and insist they are wrong', 'Avoid arguing, validate their feeling of hunger, and consult care staff about how to proceed', 'Serve them another full breakfast to avoid conflict', 'Ignore their complaint since you know they already ate'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A family member visiting during a meal complains loudly that portions are too small for their parent. What do you do?', options: ['Immediately give the resident a larger portion to keep the peace', 'Acknowledge the concern calmly, explain meals follow dietitian-approved portions, and offer to connect them with the dietitian', 'Ignore the complaint since you cannot change the meal plan', 'Tell them to take it up with management and walk away'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A resident refuses their medically prescribed low-sodium meal and asks for the regular menu. What do you do?', options: ['Serve the regular meal since residents have the right to choose', 'Refuse without explaining why', 'Explain the meal was prescribed by their care team for their health, and notify nursing staff about the refusal', 'Serve the prescribed meal without speaking to the resident'], correct: 2, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'During an unusually busy meal service, you feel overwhelmed and start falling behind. What is the most effective response?', options: ['Rush through service and cut corners', 'Notify your supervisor you need assistance and prioritize residents who need the most help first', 'Stop and take a break', 'Serve as fast as possible without asking for help'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A resident asks for a dessert not on their prescribed diet plan, claiming their doctor said it was fine. What do you do?', options: ['Serve it since the resident says it is approved', 'Check with nursing staff before serving anything outside the prescribed diet', 'Refuse without explaining and move on', 'Promise to bring it next time so you do not disappoint them now'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'During a busy service, a colleague is on their phone while residents are waiting to be served. What do you do?', options: ['Ignore it since it is their problem', 'Call them out loudly in front of the residents', 'Calmly and privately ask them to help, and mention it to a supervisor if it continues', 'Do all the work yourself and complain to others later'], correct: 2, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A resident becomes upset because their favourite dish is not available today. They have been looking forward to it all week. What is the most empathetic response?', options: ['Tell them they should not get so attached to specific meals', 'Acknowledge their disappointment, explain why it is unavailable today, and suggest an alternative they might enjoy', 'Ignore their complaint and serve the default option', 'Promise it will definitely be available tomorrow even if you are unsure'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'You accidentally spill water near a resident while serving. The resident is startled but not hurt. What do you do?', options: ['Quickly clean it up without saying anything', 'Apologize sincerely, clean it up immediately, and ensure the resident is comfortable and not distressed', 'Blame it on a wet serving tray', 'Ask the resident to be more careful about where they place their items'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A resident has barely touched their food at three consecutive meals. You are genuinely concerned. What do you do?', options: ['Assume they are just not hungry and say nothing', 'Try to force them to eat by staying at their table until they do', 'Note the pattern and report it to the nursing staff or supervisor, as it may indicate a health concern', 'Tell other residents to encourage them to eat'], correct: 2, scoring: 'eq' },
+  ],
+
+  'Cook': [
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A dietary order change comes in 15 minutes before service — a resident must now receive a puréed meal instead of regular. You are already behind. What do you do?', options: ['Skip the change since there is not enough time', 'Quickly adapt the meal to meet the dietary requirement, even if it slightly delays service — this directly affects resident health', 'Serve the regular meal and note the dietary change for next time', 'Ask the server to handle it'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'You realize a meal prepared for a resident with a nut allergy may have been cross-contaminated with nuts. The trays have not been delivered yet. What do you do?', options: ['Serve it since the amount is probably negligible', 'Pull the tray immediately, prepare a safe replacement, and notify the dietitian and nursing staff right away', 'Tell the server to warn the resident when they deliver it', 'Wait to see if the resident reports a reaction before escalating'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A server repeatedly tells you the food you send out is always cold by the time it reaches residents. You disagree. What is the most productive response?', options: ['Dismiss the complaint since you know the food leaves the kitchen hot', 'Defend your work and tell the server to deliver trays faster', 'Take the feedback seriously, investigate possible causes, and work with the server to find a solution', 'Report the server to the manager for being difficult'], correct: 2, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A new kitchen staff member keeps making preparation errors despite training. The errors are creating extra work. What do you do?', options: ['Tell them they are not cut out for the job', 'Redo their work without telling them to avoid slowing things down', 'Have a calm, supportive conversation identifying the specific errors and provide additional guidance', 'Immediately report them to management for poor performance'], correct: 2, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'You are significantly behind on meal prep with service starting in 20 minutes. What is the best approach?', options: ['Cut food safety corners to catch up', 'Notify your supervisor about the delay, triage the most critical items, and communicate with the service team', 'Say nothing and serve what is ready', 'Blame the delay on the new staff member'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A resident\'s family requests a special birthday meal not on the menu or budget. They speak directly to you in the kitchen. What do you do?', options: ['Agree to prepare it since it is a kind gesture', 'Decline immediately since it is not on the menu', 'Explain that changes must go through the dietitian and management, and offer to pass the request along through the proper channel', 'Tell them to bring the food themselves'], correct: 2, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A colleague consistently skips required temperature logging and storage checks, saying it is unnecessary paperwork. What do you do?', options: ['Mind your own business since they have more experience', 'Complete their logs for them to cover the gap', 'Address it with them directly, explaining the risk to residents, and escalate if the behaviour continues', 'Report them to management immediately without speaking to them first'], correct: 2, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'Two kitchen staff members begin arguing loudly during a busy prep period, disrupting the team. What do you do?', options: ['Join in to mediate by taking a side', 'Ignore it and focus on your own work', 'Calmly ask both to stop, refocus on the task at hand, and address the conflict after service with a supervisor if needed', 'Report both staff members to management immediately'], correct: 2, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'You realize you used salted butter instead of unsalted in a large batch of soup — significant for residents on low-sodium diets. The soup has not been served yet. What do you do?', options: ['Serve it anyway since the difference is minor', 'Discard the batch, prepare a new one, and inform your supervisor and dietitian about the error', 'Serve it only to residents not on low-sodium diets and say nothing', 'Dilute it with water and serve it'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A resident with swallowing difficulties was served a regular-texture meal instead of the required minced-and-moist texture. They are about to start eating. What is the immediate action?', options: ['Let them eat it since it probably will not cause an issue this one time', 'Remove the meal immediately, prepare the correct texture, and notify nursing staff and your supervisor', 'Tell the server to cut the food into smaller pieces', 'Wait to see if the resident manages okay before acting'], correct: 1, scoring: 'eq' },
+    { section: 'Emotional Intelligence', type: 'sjt', text: 'A kitchen staff member tells you they have been nauseous and had diarrhea this morning but want to stay since you are short-staffed. What do you do?', options: ['Allow them to work since you need the help', 'Ask them to wear gloves and a mask and continue', 'Tell them they must go home — food handlers who are ill pose a direct risk to resident health — and notify your supervisor', 'Let them work through prep but send them home before service'], correct: 2, scoring: 'eq' },
+  ],
+};
+
+// ─── PERSONALITY QUESTIONS (10) — universal for all roles ───
+const PERSONALITY_QUESTIONS = [
+  { section: 'Personality', type: 'likert', text: 'I enjoy working with a wide variety of people and adapting to their different needs.', trait: 'Openness', scoring: 'personality' },
+  { section: 'Personality', type: 'likert', text: 'I complete tasks thoroughly and on time, even when the work is repetitive.', trait: 'Conscientiousness', scoring: 'personality' },
+  { section: 'Personality', type: 'likert', text: 'I feel energized when interacting with people throughout my shift.', trait: 'Extraversion', scoring: 'personality' },
+  { section: 'Personality', type: 'likert', text: 'I naturally consider how my actions affect others before making decisions at work.', trait: 'Agreeableness', scoring: 'personality' },
+  { section: 'Personality', type: 'likert', text: 'I remain calm and focused when multiple demands are placed on me at once.', trait: 'Stress Tolerance', scoring: 'personality' },
+  { section: 'Personality', type: 'likert', text: 'I am always looking for new ways to do my job more effectively.', trait: 'Openness', scoring: 'personality' },
+  { section: 'Personality', type: 'likert', text: 'I take pride in maintaining high standards even when no one is supervising me.', trait: 'Conscientiousness', scoring: 'personality' },
+  { section: 'Personality', type: 'likert', text: 'I believe every person deserves dignity and respect regardless of their condition or behaviour.', trait: 'Agreeableness', scoring: 'personality' },
+  { section: 'Personality', type: 'likert', text: 'When something at work goes wrong unexpectedly, I recover quickly and refocus.', trait: 'Stress Tolerance', scoring: 'personality' },
+  { section: 'Personality', type: 'likert', text: 'I prefer to have a structured routine and clear guidelines when performing my duties.', trait: 'Conscientiousness', scoring: 'personality' },
+];
+
+// ─── BUILD FUNCTION — assembles 41 questions for the selected role ───
+function resolveRoleKey(role) {
+  const keys = Object.keys(ROLE_COGNITIVE);
+  return keys.find(k => k === role)
+    || keys.find(k => role && role.toLowerCase().includes(k.split('/')[0].trim().toLowerCase()))
+    || 'Care Aide / PSW';
+}
+
+function buildQuestions(role) {
+  const key = resolveRoleKey(role);
+  return [
+    ...SHARED_COGNITIVE,
+    ...(ROLE_COGNITIVE[key] || []),
+    ...SHARED_EQ,
+    ...(ROLE_EQ[key] || []),
+    ...PERSONALITY_QUESTIONS,
+  ];
+}
+
+let QUESTIONS = [];
+
+const LIKERT_LABELS = ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'];
+const LIKERT_VALUES = [1, 2, 3, 4, 5];
+
+const ADMIN_PASSWORD = 'bentley2026';
+const STORAGE_KEY = 'bentley_assessment_results';
+
+// State
+let currentQ = 0;
+let answers = {};
+let candidateName = '';
+let candidateRole = '';
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+function goToScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+}
+
+function startAssessment() {
+  candidateName = document.getElementById('candidateName').value.trim();
+  candidateRole = document.getElementById('candidateRole').value;
+  if (!candidateName || !candidateRole) {
+    alert('Please enter your name and select a position before continuing.');
+    return;
+  }
+  QUESTIONS = buildQuestions(candidateRole);
+  currentQ = 0;
+  answers = {};
+  goToScreen('assessment');
+  renderQuestion();
+}
+
+function navigate(dir) {
+  if (dir === 1 && answers[currentQ] === undefined) {
+    alert('Please answer this question before proceeding.');
+    return;
+  }
+  if (dir === -1 && currentQ === 0) return;
+  currentQ += dir;
+  if (currentQ >= QUESTIONS.length) {
+    submitAssessment();
+    return;
+  }
+  renderQuestion();
+}
+
+// ══════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════
+function renderQuestion() {
+  const q = QUESTIONS[currentQ];
+  const total = QUESTIONS.length;
+  const pct = Math.round(((currentQ + 1) / total) * 100);
+
+  document.getElementById('progressLabel').textContent = `Question ${currentQ + 1} of ${total}`;
+  document.getElementById('sectionLabel').textContent = `Section: ${q.section}`;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('btnBack').style.visibility = currentQ === 0 ? 'hidden' : 'visible';
+  document.getElementById('btnNext').textContent = currentQ === total - 1 ? 'Submit ✓' : 'Next →';
+
+  let html = `
+    <div class="section-badge"><span class="dot"></span>${q.section}</div>
+    <div class="question-card">
+      <div class="question-number">Question ${currentQ + 1}</div>
+      <div class="question-text">${q.text}</div>
+  `;
+
+  if (q.type === 'mcq' || q.type === 'sjt') {
+    html += '<div class="options-list">';
+    q.options.forEach((opt, i) => {
+      const sel = answers[currentQ] === i ? 'selected' : '';
+      html += `
+        <label class="option-item ${sel}" id="opt-${i}" onclick="selectMCQ(${i})">
+          <input type="radio" name="q${currentQ}" ${sel ? 'checked' : ''}>
+          <div class="option-radio"></div>
+          <span class="option-label">${opt}</span>
+        </label>`;
+    });
+    html += '</div>';
+  } else if (q.type === 'likert') {
+    const traitNote = q.trait ? `<div style="font-size:12px;color:var(--muted);margin-bottom:16px;font-weight:500;text-transform:uppercase;letter-spacing:0.08em;">Trait: ${q.trait}</div>` : '';
+    html += traitNote;
+    html += '<div class="likert-label-row"><span>Strongly Disagree</span><span>Strongly Agree</span></div>';
+    html += '<div class="likert-scale">';
+    LIKERT_VALUES.forEach((val, i) => {
+      const sel = answers[currentQ] === val ? 'selected' : '';
+      html += `<button class="likert-btn ${sel}" onclick="selectLikert(${val})">${val}</button>`;
+    });
+    html += '</div>';
+    html += '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px;"><span>1 = Strongly Disagree</span><span>5 = Strongly Agree</span></div>';
+  }
+
+  html += '</div>';
+  document.getElementById('questionContainer').innerHTML = html;
+}
+
+function selectMCQ(idx) {
+  answers[currentQ] = idx;
+  document.querySelectorAll('.option-item').forEach((el, i) => {
+    el.classList.toggle('selected', i === idx);
+  });
+}
+
+function selectLikert(val) {
+  answers[currentQ] = val;
+  document.querySelectorAll('.likert-btn').forEach((btn, i) => {
+    btn.classList.toggle('selected', LIKERT_VALUES[i] === val);
+  });
+}
+
+// ══════════════════════════════════════════
+// SUBMIT & SCORING
+// ══════════════════════════════════════════
+function submitAssessment() {
+  const scores = calculateScores();
+  const result = {
+    id: Date.now(),
+    name: candidateName,
+    role: candidateRole,
+    date: new Date().toLocaleDateString('en-CA'),
+    time: new Date().toLocaleTimeString('en-CA', {hour:'2-digit', minute:'2-digit'}),
+    scores,
+    answers: { ...answers },
+    questions: QUESTIONS.map((q, i) => ({
+      section: q.section,
+      text: q.text,
+      type: q.type,
+      answer: answers[i],
+      options: q.options || null,
+      trait: q.trait || null,
+      correct: q.correct !== undefined ? q.correct : null
+    }))
+  };
+
+  const results = getResults();
+  results.push(result);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(results));
+
+  goToScreen('thankyou');
+}
+
+function calculateScores() {
+  let cognitive = 0, cogMax = 0;
+  let eq = 0, eqMax = 0;
+  let ocean = { Openness: 0, Conscientiousness: 0, Extraversion: 0, Agreeableness: 0, 'Stress Tolerance': 0 };
+  let oceanCount = { Openness: 0, Conscientiousness: 0, Extraversion: 0, Agreeableness: 0, 'Stress Tolerance': 0 };
+
+  // Validate all questions have answers
+  let unansweredCount = 0;
+  QUESTIONS.forEach((q, i) => {
+    if (answers[i] === undefined) {
+      unansweredCount++;
+    }
+  });
+
+  if (unansweredCount > 0) {
+    console.warn(`Warning: ${unansweredCount} questions were not answered. Scoring may be incomplete.`);
+  }
+
+  // Score cognitive and EQ questions
+  QUESTIONS.forEach((q, i) => {
+    const a = answers[i];
+
+    if (q.scoring === 'cognitive') {
+      cogMax++;
+      // Validate answer is numeric and within range
+      if (typeof a === 'number' && a >= 0 && a < q.options.length) {
+        if (a === q.correct) cognitive++;
+      }
+    } else if (q.scoring === 'eq') {
+      eqMax++;
+      // Validate answer is numeric and within range
+      if (typeof a === 'number' && a >= 0 && a < q.options.length) {
+        if (a === q.correct) eq++;
+      }
+    } else if (q.scoring === 'personality' && q.trait && a !== undefined) {
+      // Validate Likert value is 1-5
+      if (typeof a === 'number' && a >= 1 && a <= 5) {
+        ocean[q.trait] += a;
+        oceanCount[q.trait]++;
+      }
+    }
+  });
+
+  // Safety check: prevent division by zero
+  if (cogMax === 0 || eqMax === 0) {
+    console.error('Error: No cognitive or EQ questions found in assessment.');
+    return null;
+  }
+
+  // Normalize personality to % (divide by max possible per trait)
+  const oceanPct = {};
+  Object.keys(ocean).forEach(trait => {
+    const count = oceanCount[trait];
+    if (count > 0) {
+      oceanPct[trait] = Math.round((ocean[trait] / (count * 5)) * 100);
+      // Ensure percentages are capped at 100%
+      if (oceanPct[trait] > 100) oceanPct[trait] = 100;
+    } else {
+      oceanPct[trait] = 0;
+    }
+  });
+
+  return {
+    cognitive: { score: cognitive, max: cogMax, pct: Math.round((cognitive / cogMax) * 100) },
+    eq: { score: eq, max: eqMax, pct: Math.round((eq / eqMax) * 100) },
+    ocean: oceanPct
+  };
+}
+
+// Audit function to verify assessment integrity (admin can call this to validate scoring)
+function auditAssessment() {
+  let issues = [];
+
+  // Check question structure: now 39 questions (15 cognitive + 16 EQ + 10 personality)
+  if (!QUESTIONS || QUESTIONS.length !== 39) {
+    issues.push(`ERROR: Expected 39 questions, found ${QUESTIONS.length}`);
+  }
+
+  // Check cognitive questions (Q1-15)
+  const cognitiveQs = QUESTIONS.filter((q, i) => i < 15);
+  if (cognitiveQs.length !== 15) issues.push(`ERROR: Expected 15 cognitive questions, found ${cognitiveQs.length}`);
+  cognitiveQs.forEach((q, i) => {
+    if (q.scoring !== 'cognitive') issues.push(`Q${i+1}: Missing cognitive scoring`);
+    if (typeof q.correct !== 'number') issues.push(`Q${i+1}: Invalid correct answer key`);
+    if (q.correct >= q.options.length) issues.push(`Q${i+1}: Correct index out of range`);
+  });
+
+  // Check EQ questions (Q16-31)
+  const eqQs = QUESTIONS.filter((q, i) => i >= 15 && i < 31);
+  if (eqQs.length !== 16) issues.push(`ERROR: Expected 16 EQ questions, found ${eqQs.length}`);
+  eqQs.forEach((q, i) => {
+    if (q.scoring !== 'eq') issues.push(`Q${i+16}: Missing EQ scoring`);
+    if (typeof q.correct !== 'number') issues.push(`Q${i+16}: Invalid correct answer key`);
+    if (q.correct >= q.options.length) issues.push(`Q${i+16}: Correct index out of range`);
+  });
+
+  // Check personality questions (Q32-41)
+  const personalityQs = QUESTIONS.filter((q, i) => i >= 31);
+  if (personalityQs.length !== 10) issues.push(`ERROR: Expected 10 personality questions, found ${personalityQs.length}`);
+  const validTraits = ['Openness', 'Conscientiousness', 'Extraversion', 'Agreeableness', 'Stress Tolerance'];
+  personalityQs.forEach((q, i) => {
+    if (q.scoring !== 'personality') issues.push(`Q${i+32}: Missing personality scoring`);
+    if (!q.trait || !validTraits.includes(q.trait)) issues.push(`Q${i+32}: Invalid trait "${q.trait}"`);
+    if (q.type !== 'likert') issues.push(`Q${i+32}: Personality questions must be Likert type`);
+  });
+
+  // Check that each trait has multiple questions
+  const traitCounts = {};
+  personalityQs.forEach(q => {
+    traitCounts[q.trait] = (traitCounts[q.trait] || 0) + 1;
+  });
+  Object.entries(traitCounts).forEach(([trait, count]) => {
+    if (count < 2) issues.push(`WARNING: Trait "${trait}" has only ${count} question(s), should have 2+`);
+  });
+
+  return {
+    isValid: issues.length === 0,
+    issueCount: issues.length,
+    issues: issues,
+    totalQuestions: 39,
+    breakdown: { cognitive: 15, eq: 16, personality: 10 },
+    summary: issues.length === 0 ? '✓ Assessment structure is valid (39 questions, professional-grade screening)' : `✗ Found ${issues.length} issues`
+  };
+}
+
+// ══════════════════════════════════════════
+// ADMIN
+// ══════════════════════════════════════════
+function adminLogin() {
+  const pw = document.getElementById('adminPassword').value;
+  if (pw === ADMIN_PASSWORD) {
+    document.getElementById('loginError').style.display = 'none';
+    goToScreen('adminDashboard');
+    renderResults();
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+  }
+}
+
+function adminLogout() {
+  document.getElementById('adminPassword').value = '';
+  goToScreen('landing');
+}
+
+function getResults() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  } catch { return []; }
+}
+
+function renderResults() {
+  const results = getResults();
+  const el = document.getElementById('resultsContent');
+
+  if (!results.length) {
+    el.innerHTML = '<div class="no-data"><span>📋</span>No assessments submitted yet.</div>';
+    return;
+  }
+
+  let html = `<div class="results-table-wrap"><table class="results-table">
+    <thead><tr>
+      <th>Candidate</th><th>Role</th><th>Date</th>
+      <th>Composite</th><th>Cognitive</th><th>EQ</th><th>Personality</th><th>Verdict</th><th>Detail</th>
+    </tr></thead><tbody>`;
+
+  results.slice().reverse().forEach(r => {
+    const rub = getRubric(r.scores, r.role);
+    const verdictShort = rub.verdict === 'STRONG HIRE' ? 'Strong Hire'
+      : rub.verdict === 'HIRE' ? 'Hire'
+      : rub.verdict === 'CONDITIONAL — INTERVIEW REQUIRED' ? 'Conditional'
+      : 'Do Not Hire';
+    const verdictPillClass = rub.verdict === 'STRONG HIRE' || rub.verdict === 'HIRE' ? 'score-high'
+      : rub.verdict === 'CONDITIONAL — INTERVIEW REQUIRED' ? 'score-mid'
+      : 'score-low';
+    html += `<tr>
+      <td class="name">${r.name}</td>
+      <td>${r.role}</td>
+      <td>${r.date} ${r.time}</td>
+      <td><span class="score-pill ${rub.composite>=75?'score-high':rub.composite>=65?'score-mid':'score-low'}">${rub.composite}%</span></td>
+      <td><span class="score-pill ${rub.passCog?'score-high':'score-low'}">${rub.cog}%</span></td>
+      <td><span class="score-pill ${rub.passEQ?'score-high':'score-low'}">${rub.eq}%</span></td>
+      <td><span class="score-pill ${rub.passPersonality?'score-high':'score-low'}">${rub.avgPersonality}%</span></td>
+      <td><span class="score-pill ${verdictPillClass}">${verdictShort}</span></td>
+      <td><button class="detail-btn" onclick="openModal(${r.id})">View →</button></td>
+    </tr>`;
+  });
+
+  html += '</tbody></table></div>';
+  el.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// SCORING RUBRICS — The Bentley Saskatoon (High Bar, All Roles)
+//
+// VERDICT BANDS (all roles):
+//   Composite ≥ 80% + all minimums met → STRONG HIRE
+//   Composite 75–79% + all minimums met → HIRE
+//   Composite 65–74% (any minimum missed) → CONDITIONAL
+//   Composite < 65% OR critical minimum failed → DO NOT HIRE
+// ══════════════════════════════════════════════════════════════════════
+
+const ROLE_RUBRICS = {
+  'Care Aide / PSW': {
+    weights:    { cog: 0.30, eq: 0.40, personality: 0.30 },
+    minCog:     73,   // 11/15 — follow protocols, reason through care tasks
+    minEQ:      81,   // 13/16 — highest EQ bar; direct resident contact daily
+    minPersonality: 70,
+    keyTraits: {
+      'Agreeableness':    { min: 75, reason: 'compassion and dignity toward residents' },
+      'Stress Tolerance': { min: 65, reason: 'composed under emotional and physical demands' },
+      'Conscientiousness':{ min: 70, reason: 'consistent, reliable care delivery' }
+    },
+    description: 'Care Aide / PSW'
+  },
+  'Receptionist / Front Desk': {
+    weights:    { cog: 0.40, eq: 0.35, personality: 0.25 },
+    minCog:     80,   // 12/15 — scheduling, documentation, multitasking
+    minEQ:      75,   // 12/16 — first impression, family interactions
+    minPersonality: 65,
+    keyTraits: {
+      'Conscientiousness': { min: 70, reason: 'accuracy and organisation at the front desk' },
+      'Extraversion':      { min: 65, reason: 'warm, welcoming presence for residents and families' },
+      'Agreeableness':     { min: 65, reason: 'de-escalation of visitor concerns' }
+    },
+    description: 'Receptionist / Front Desk'
+  },
+  'Housekeeping / Maintenance': {
+    weights:    { cog: 0.30, eq: 0.30, personality: 0.40 },
+    minCog:     67,   // 10/15 — follow safety procedures, read labels
+    minEQ:      69,   // 11/16 — respectful presence around residents
+    minPersonality: 65,
+    keyTraits: {
+      'Conscientiousness': { min: 75, reason: 'thoroughness and infection-control compliance' },
+      'Stress Tolerance':  { min: 60, reason: 'steady pace under busy conditions' },
+      'Agreeableness':     { min: 60, reason: 'non-intrusive, respectful around residents' }
+    },
+    description: 'Housekeeping / Maintenance'
+  },
+  'Department Manager / Supervisor': {
+    weights:    { cog: 0.40, eq: 0.35, personality: 0.25 },
+    minCog:     87,   // 13/15 — strong reasoning, policy interpretation, planning
+    minEQ:      81,   // 13/16 — team leadership, conflict resolution, family communication
+    minPersonality: 70,
+    keyTraits: {
+      'Conscientiousness': { min: 75, reason: 'operational accountability and reporting accuracy' },
+      'Stress Tolerance':  { min: 70, reason: 'composure during incidents and staffing challenges' },
+      'Agreeableness':     { min: 65, reason: 'collaborative leadership style' }
+    },
+    description: 'Department Manager / Supervisor'
+  },
+  'Server': {
+    weights:    { cog: 0.30, eq: 0.40, personality: 0.30 },
+    minCog:     73,   // 11/15 — dietary needs, portion awareness
+    minEQ:      75,   // 12/16 — resident-facing; patience and warmth at mealtimes
+    minPersonality: 65,
+    keyTraits: {
+      'Agreeableness':     { min: 70, reason: 'warmth and patience serving residents at mealtimes' },
+      'Extraversion':      { min: 60, reason: 'energetic, friendly service presence' },
+      'Stress Tolerance':  { min: 60, reason: 'composed during busy service periods' }
+    },
+    description: 'Server'
+  },
+  'Cook': {
+    weights:    { cog: 0.35, eq: 0.35, personality: 0.30 },
+    minCog:     73,   // 11/15 — recipe accuracy, portion math, food safety
+    minEQ:      75,   // 12/16 — kitchen teamwork, communicating with dietary staff
+    minPersonality: 65,
+    keyTraits: {
+      'Conscientiousness': { min: 70, reason: 'food safety compliance and consistency' },
+      'Stress Tolerance':  { min: 60, reason: 'high-pressure kitchen service periods' },
+      'Agreeableness':     { min: 65, reason: 'collaborative kitchen environment' }
+    },
+    description: 'Cook'
+  }
+};
+
+function resolveRubric(role) {
+  if (ROLE_RUBRICS[role]) return ROLE_RUBRICS[role];
+  // Fallback: match partial role name
+  const key = Object.keys(ROLE_RUBRICS).find(k => role && role.toLowerCase().includes(k.split('/')[0].trim().toLowerCase()));
+  return key ? ROLE_RUBRICS[key] : ROLE_RUBRICS['Cook']; // safe default
+}
+
+function getRubric(scores, role) {
+  const rubricDef = resolveRubric(role || scores.role || '');
+  const cog = scores.cognitive.pct;
+  const eq  = scores.eq.pct;
+  const ocean = scores.ocean;
+  const avgPersonality = Math.round(
+    Object.values(ocean).reduce((a, b) => a + b, 0) / Object.values(ocean).length
+  );
+
+  const { weights, minCog, minEQ, minPersonality, keyTraits } = rubricDef;
+  const composite = Math.round((cog * weights.cog) + (eq * weights.eq) + (avgPersonality * weights.personality));
+
+  const passCog         = cog >= minCog;
+  const passEQ          = eq  >= minEQ;
+  const passPersonality = avgPersonality >= minPersonality;
+  const allMinimumsMet  = passCog && passEQ && passPersonality;
+
+  // Key trait checks
+  const traitResults = {};
+  Object.entries(keyTraits).forEach(([trait, cfg]) => {
+    traitResults[trait] = {
+      score: ocean[trait] || 0,
+      min: cfg.min,
+      reason: cfg.reason,
+      pass: (ocean[trait] || 0) >= cfg.min
+    };
+  });
+  const allKeyTraitsPass = Object.values(traitResults).every(t => t.pass);
+
+  let verdict, verdictColor, verdictBg;
+  if (allMinimumsMet && composite >= 80) {
+    verdict = 'STRONG HIRE'; verdictColor = '#1B5E20'; verdictBg = '#E8F5E9';
+  } else if (allMinimumsMet && composite >= 75) {
+    verdict = 'HIRE'; verdictColor = '#2E7D32'; verdictBg = '#F1F8E9';
+  } else if (composite >= 65) {
+    verdict = 'CONDITIONAL — INTERVIEW REQUIRED'; verdictColor = '#E65100'; verdictBg = '#FFF3E0';
+  } else {
+    verdict = 'DO NOT HIRE'; verdictColor = '#B71C1C'; verdictBg = '#FFEBEE';
+  }
+
+  return {
+    composite, cog, eq, avgPersonality,
+    passCog, passEQ, passPersonality, allMinimumsMet,
+    minCog, minEQ, minPersonality,
+    traitResults, allKeyTraitsPass,
+    verdict, verdictColor, verdictBg,
+    rubricDef
+  };
+}
+
+function generateNarrative(scores, role) {
+  const r = getRubric(scores, role || scores.role);
+  const name = scores.name;
+  const ocean = scores.ocean;
+  const roleName = r.rubricDef.description;
+
+  const weakTraits   = Object.entries(ocean).filter(([,v]) => v < 55).map(([k]) => k);
+  const strongTraits = Object.entries(ocean).filter(([,v]) => v >= 75).map(([k]) => k);
+
+  const traitGaps = Object.entries(r.traitResults)
+    .filter(([, t]) => !t.pass)
+    .map(([trait, t]) => `${trait} (${t.score}% — minimum ${t.min}% needed for ${t.reason})`);
+
+  let narrative = '';
+
+  if (r.verdict === 'STRONG HIRE') {
+    narrative = `${name} is an outstanding candidate for the ${roleName} role with a composite score of ${r.composite}%. They exceed all minimum thresholds — Cognitive Ability (${r.cog}%), Emotional Intelligence (${r.eq}%), and Personality Fit (${r.avgPersonality}%). ${strongTraits.length ? 'Standout personality strengths include ' + strongTraits.join(' and ') + '.' : ''} This candidate demonstrates the profile The Bentley looks for in top-tier ${roleName} staff. Recommend proceeding directly to a conditional offer.`;
+
+  } else if (r.verdict === 'HIRE') {
+    narrative = `${name} meets all hiring standards for the ${roleName} role with a composite score of ${r.composite}%. Cognitive Ability (${r.cog}%), Emotional Intelligence (${r.eq}%), and Personality Fit (${r.avgPersonality}%) are all at or above the required minimums. ${strongTraits.length ? 'Notable strengths: ' + strongTraits.join(', ') + '.' : ''} ${traitGaps.length ? 'Minor areas to probe in interview: ' + traitGaps.join('; ') + '.' : ''} Recommend proceeding to a final interview.`;
+
+  } else if (r.verdict === 'CONDITIONAL — INTERVIEW REQUIRED') {
+    const minGaps = [];
+    if (!r.passCog)  minGaps.push(`Cognitive Ability ${r.cog}% (minimum ${r.minCog}%)`);
+    if (!r.passEQ)   minGaps.push(`Emotional Intelligence ${r.eq}% (minimum ${r.minEQ}%)`);
+    if (!r.passPersonality) minGaps.push(`Personality Fit ${r.avgPersonality}% (minimum ${r.minPersonality}%)`);
+    const allGaps = [...minGaps, ...traitGaps];
+
+    narrative = `${name} scored ${r.composite}% overall and shows some potential for the ${roleName} role, but does not meet all minimum thresholds. Gaps identified: ${allGaps.join('; ')}. ${weakTraits.length ? 'Additional concern: low scores in ' + weakTraits.join(' and ') + '.' : ''} A structured behavioural interview is required before any decision is made. Focus questioning on the specific gaps listed above.`;
+
+  } else {
+    const minGaps = [];
+    if (!r.passCog)  minGaps.push(`Cognitive Ability ${r.cog}% (minimum ${r.minCog}%)`);
+    if (!r.passEQ)   minGaps.push(`Emotional Intelligence ${r.eq}% (minimum ${r.minEQ}%)`);
+    if (!r.passPersonality) minGaps.push(`Personality Fit ${r.avgPersonality}% (minimum ${r.minPersonality}%)`);
+
+    narrative = `${name} scored ${r.composite}% and does not meet the minimum hiring standard for a ${roleName} at The Bentley. Key shortfalls: ${minGaps.join('; ')}. ${traitGaps.length ? 'Critical trait gaps: ' + traitGaps.join('; ') + '.' : ''} This profile does not align with the standards required for this role. Not recommended for further consideration at this time.`;
+  }
+
+  return { narrative, rubric: r };
+}
+
+function openModal(id) {
+  const results = getResults();
+  const r = results.find(x => x.id === id);
+  if (!r) return;
+
+  const { cognitive, eq, ocean } = r.scores;
+  const { narrative, rubric } = generateNarrative(r.scores, r.role);
+
+  let oceanBars = '';
+  Object.entries(ocean).forEach(([trait, pct]) => {
+    oceanBars += `<div class="ocean-row">
+      <div class="ocean-label">${trait}</div>
+      <div class="ocean-track"><div class="ocean-fill" style="width:${pct}%"></div></div>
+      <div class="ocean-score">${pct}%</div>
+    </div>`;
+  });
+
+  let answerRows = '';
+  if (r.questions) {
+    r.questions.forEach((q, i) => {
+      let answerDisplay = '';
+      if (q.type === 'likert') {
+        answerDisplay = LIKERT_LABELS[r.answers[i] - 1] || r.answers[i];
+      } else if (q.options && r.answers[i] !== undefined) {
+        const isCorrect = r.answers[i] === q.correct;
+        const label = q.options[r.answers[i]];
+        answerDisplay = `${label} ${isCorrect ? '✓' : '✗'}`;
+      }
+      answerRows += `<tr><td>${q.text}</td><td>${answerDisplay}</td></tr>`;
+    });
+  }
+
+  const html = `
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h3>${r.name}</h3>
+    <div class="meta">${r.role} · ${r.date} at ${r.time}</div>
+
+    <!-- VERDICT BADGE -->
+    <div style="background:${rubric.verdictBg};border:1.5px solid ${rubric.verdictColor}33;border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+      <div>
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:${rubric.verdictColor};margin-bottom:3px;">Hiring Recommendation</div>
+        <div style="font-size:18px;font-weight:700;color:${rubric.verdictColor};">${rubric.verdict}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:2px;">Composite Score</div>
+        <div style="font-size:28px;font-weight:700;color:${rubric.verdictColor};font-family:'Playfair Display',serif;">${rubric.composite}%</div>
+      </div>
+    </div>
+
+    <!-- THRESHOLD CHECKS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
+      <div style="background:var(--cream);border:1px solid ${rubric.passCog ? '#A5D6A7' : '#FFCDD2'};border-radius:8px;padding:10px 12px;">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:3px;">Cognitive ≥73%</div>
+        <div style="font-size:16px;font-weight:700;color:${rubric.passCog ? '#2E7D32' : '#B71C1C'}">${rubric.cog}% ${rubric.passCog ? '✓' : '✗'}</div>
+      </div>
+      <div style="background:var(--cream);border:1px solid ${rubric.passEQ ? '#A5D6A7' : '#FFCDD2'};border-radius:8px;padding:10px 12px;">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:3px;">EQ ≥75%</div>
+        <div style="font-size:16px;font-weight:700;color:${rubric.passEQ ? '#2E7D32' : '#B71C1C'}">${rubric.eq}% ${rubric.passEQ ? '✓' : '✗'}</div>
+      </div>
+      <div style="background:var(--cream);border:1px solid ${rubric.passPersonality ? '#A5D6A7' : '#FFCDD2'};border-radius:8px;padding:10px 12px;">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:3px;">Personality ≥65%</div>
+        <div style="font-size:16px;font-weight:700;color:${rubric.passPersonality ? '#2E7D32' : '#B71C1C'}">${rubric.avgPersonality}% ${rubric.passPersonality ? '✓' : '✗'}</div>
+      </div>
+    </div>
+    <!-- KEY TRAIT CHECKS (role-specific) -->
+    <div style="margin-bottom:6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);">Key Traits for ${r.role}</div>
+    <div style="display:grid;grid-template-columns:repeat(${Object.keys(rubric.traitResults).length},1fr);gap:8px;margin-bottom:20px;">
+      ${Object.entries(rubric.traitResults).map(([trait, t]) => `
+      <div style="background:var(--cream);border:1px solid ${t.pass ? '#A5D6A7' : '#FFCDD2'};border-radius:8px;padding:10px 12px;">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:3px;">${trait} ≥${t.min}%</div>
+        <div style="font-size:14px;font-weight:700;color:${t.pass ? '#2E7D32' : '#B71C1C'}">${t.score}% ${t.pass ? '✓' : '✗'}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px;">${t.reason}</div>
+      </div>`).join('')}
+    </div>
+
+    <!-- NARRATIVE -->
+    <div style="background:var(--gold-pale);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:14px;line-height:1.7;color:var(--charcoal);">
+      <strong style="display:block;margin-bottom:6px;color:var(--gold);text-transform:uppercase;font-size:11px;letter-spacing:0.08em;">Assessment Narrative</strong>
+      ${narrative}
+    </div>
+
+    <div class="section-scores">
+      <div class="score-block">
+        <div class="label">Cognitive</div>
+        <div class="val">${cognitive.pct}%</div>
+        <div class="max">${cognitive.score} / ${cognitive.max} correct</div>
+      </div>
+      <div class="score-block">
+        <div class="label">Emotional IQ</div>
+        <div class="val">${eq.pct}%</div>
+        <div class="max">${eq.score} / ${eq.max} correct</div>
+      </div>
+      <div class="score-block">
+        <div class="label">Avg Personality</div>
+        <div class="val">${Math.round(Object.values(ocean).reduce((a,b)=>a+b,0)/Object.values(ocean).length)}%</div>
+        <div class="max">Overall fit score</div>
+      </div>
+    </div>
+
+    <h4 style="font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:12px;">Big Five Personality (OCEAN)</h4>
+    <div class="ocean-bars">${oceanBars}</div>
+
+    <h4 style="font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin:24px 0 12px;">Full Answers</h4>
+    <table class="answer-table">
+      <tr><th>Question</th><th>Answer</th></tr>
+      ${answerRows}
+    </table>
+  `;
+
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modalOverlay')) {
+    document.getElementById('modalOverlay').classList.remove('open');
+  }
+}
+
+function clearResults() {
+  if (confirm('Delete ALL candidate results? This cannot be undone.')) {
+    localStorage.removeItem(STORAGE_KEY);
+    renderResults();
+  }
+}
+
+function exportCSV() {
+  const results = getResults();
+  if (!results.length) { alert('No results to export.'); return; }
+
+  const headers = ['Name','Role','Date','Time','Cognitive %','EQ %','Openness','Conscientiousness','Extraversion','Agreeableness','Stress Tolerance'];
+  const rows = results.map(r => [
+    r.name, r.role, r.date, r.time,
+    r.scores.cognitive.pct, r.scores.eq.pct,
+    r.scores.ocean['Openness'] || 0,
+    r.scores.ocean['Conscientiousness'] || 0,
+    r.scores.ocean['Extraversion'] || 0,
+    r.scores.ocean['Agreeableness'] || 0,
+    r.scores.ocean['Stress Tolerance'] || 0
+  ]);
+
+  const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'bentley_assessment_results.csv'; a.click();
+}
+</script>
+</body>
+</html>
