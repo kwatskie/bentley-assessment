@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
 <title>The Bentley Saskatoon — Candidate Assessment</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -525,7 +526,7 @@
       </div>
       <div class="field-group">
         <label>Full Name</label>
-        <input type="text" id="candidateName" placeholder="e.g. Maria Santos">
+        <input type="text" id="candidateName" placeholder="e.g. Maria Santos" maxlength="100">
       </div>
       <div class="field-group">
         <label>Position Applied For</label>
@@ -608,6 +609,7 @@
 </div>
 
 <script>
+(function () {
 // ══════════════════════════════════════════════════════════════════════
 // QUESTION BANKS — Role-personalized (41 questions per candidate)
 // Structure: 5 shared cognitive + 10 role cognitive
@@ -963,10 +965,10 @@ function renderQuestion() {
   document.getElementById('btnNext').textContent = currentQ === total - 1 ? 'Submit ✓' : 'Next →';
 
   let html = `
-    <div class="section-badge"><span class="dot"></span>${q.section}</div>
+    <div class="section-badge"><span class="dot"></span>${escapeHTML(q.section)}</div>
     <div class="question-card">
       <div class="question-number">Question ${currentQ + 1}</div>
-      <div class="question-text">${q.text}</div>
+      <div class="question-text">${escapeHTML(q.text)}</div>
   `;
 
   if (q.type === 'mcq' || q.type === 'sjt') {
@@ -977,12 +979,12 @@ function renderQuestion() {
         <label class="option-item ${sel}" id="opt-${i}" onclick="selectMCQ(${i})">
           <input type="radio" name="q${currentQ}" ${sel ? 'checked' : ''}>
           <div class="option-radio"></div>
-          <span class="option-label">${opt}</span>
+          <span class="option-label">${escapeHTML(opt)}</span>
         </label>`;
     });
     html += '</div>';
   } else if (q.type === 'likert') {
-    const traitNote = q.trait ? `<div style="font-size:12px;color:var(--muted);margin-bottom:16px;font-weight:500;text-transform:uppercase;letter-spacing:0.08em;">Trait: ${q.trait}</div>` : '';
+    const traitNote = q.trait ? `<div style="font-size:12px;color:var(--muted);margin-bottom:16px;font-weight:500;text-transform:uppercase;letter-spacing:0.08em;">Trait: ${escapeHTML(q.trait)}</div>` : '';
     html += traitNote;
     html += '<div class="likert-label-row"><span>Strongly Disagree</span><span>Strongly Agree</span></div>';
     html += '<div class="likert-scale">';
@@ -1036,7 +1038,7 @@ function submitAssessment() {
       answer: answers[i],
       options: q.options || null,
       trait: q.trait || null,
-      correct: q.correct !== undefined ? q.correct : null
+      wasCorrect: q.correct !== undefined ? answers[i] === q.correct : null
     }))
   };
 
@@ -1445,9 +1447,8 @@ function openModal(id) {
       if (q.type === 'likert') {
         answerDisplay = LIKERT_LABELS[r.answers[i] - 1] || r.answers[i];
       } else if (q.options && r.answers[i] !== undefined) {
-        const isCorrect = r.answers[i] === q.correct;
-        const label = q.options[r.answers[i]];
-        answerDisplay = `${label} ${isCorrect ? '✓' : '✗'}`;
+        const label = escapeHTML(q.options[r.answers[i]]);
+        answerDisplay = `${label} ${q.wasCorrect ? '✓' : '✗'}`;
       }
       answerRows += `<tr><td>${q.text}</td><td>${answerDisplay}</td></tr>`;
     });
@@ -1570,6 +1571,21 @@ function exportCSV() {
   const a = document.createElement('a');
   a.href = url; a.download = 'bentley_assessment_results.csv'; a.click();
 }
+
+// Expose only the functions called from HTML onclick handlers
+window.startAssessment = startAssessment;
+window.navigate        = navigate;
+window.selectMCQ       = selectMCQ;
+window.selectLikert    = selectLikert;
+window.goToScreen      = goToScreen;
+window.adminLogin      = adminLogin;
+window.adminLogout     = adminLogout;
+window.openModal       = openModal;
+window.closeModal      = closeModal;
+window.exportCSV       = exportCSV;
+window.clearResults    = clearResults;
+
+})();
 </script>
 </body>
 </html>
