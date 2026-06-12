@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
 <title>The Bentley Saskatoon — Candidate Assessment</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -896,8 +896,7 @@ let QUESTIONS = [];
 const LIKERT_LABELS = ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'];
 const LIKERT_VALUES = [1, 2, 3, 4, 5];
 
-const ADMIN_PASSWORD = 'bentley2026';
-const STORAGE_KEY = 'bentley_assessment_results';
+const API = '/.netlify/functions';
 
 function escapeHTML(str) {
   return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
@@ -906,6 +905,11 @@ function csvField(val) {
   const s = String(val ?? '');
   return (s.includes(',') || s.includes('"') || s.includes('\n')) ? `"${s.replace(/"/g,'""')}"` : s;
 }
+
+// Session token (stored in sessionStorage — clears on tab/browser close)
+function getToken()      { return sessionStorage.getItem('bentley_admin_token'); }
+function setToken(t)     { sessionStorage.setItem('bentley_admin_token', t); }
+function clearToken()    { sessionStorage.removeItem('bentley_admin_token'); }
 
 // State
 let currentQ = 0;
@@ -936,7 +940,7 @@ function startAssessment() {
   renderQuestion();
 }
 
-function navigate(dir) {
+async function navigate(dir) {
   if (dir === 1 && answers[currentQ] === undefined) {
     alert('Please answer this question before proceeding.');
     return;
@@ -944,7 +948,7 @@ function navigate(dir) {
   if (dir === -1 && currentQ === 0) return;
   currentQ += dir;
   if (currentQ >= QUESTIONS.length) {
-    submitAssessment();
+    await submitAssessment();
     return;
   }
   renderQuestion();
@@ -1017,36 +1021,29 @@ function selectLikert(val) {
 // ══════════════════════════════════════════
 // SUBMIT & SCORING
 // ══════════════════════════════════════════
-function submitAssessment() {
-  const scores = calculateScores();
-  if (!scores) {
-    alert('An error occurred scoring the assessment. Please contact your administrator.');
-    return;
+async function submitAssessment() {
+  // Send only raw answers + display data — server scores independently
+  const questions = QUESTIONS.map((q, i) => ({
+    section: q.section,
+    text:    q.text,
+    type:    q.type,
+    answer:  answers[i],
+    options: q.options || null,
+    trait:   q.trait   || null,
+    wasCorrect: null, // server overwrites this
+  }));
+
+  try {
+    const resp = await fetch(`${API}/submit`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ name: candidateName, role: candidateRole, answers, questions }),
+    });
+    if (!resp.ok) throw new Error('Server error');
+    goToScreen('thankyou');
+  } catch (_) {
+    alert('Submission failed. Please try again or contact your administrator.');
   }
-  const result = {
-    id: Date.now(),
-    name: candidateName,
-    role: candidateRole,
-    date: new Date().toLocaleDateString('en-CA'),
-    time: new Date().toLocaleTimeString('en-CA', {hour:'2-digit', minute:'2-digit'}),
-    scores,
-    answers: { ...answers },
-    questions: QUESTIONS.map((q, i) => ({
-      section: q.section,
-      text: q.text,
-      type: q.type,
-      answer: answers[i],
-      options: q.options || null,
-      trait: q.trait || null,
-      wasCorrect: q.correct !== undefined ? answers[i] === q.correct : null
-    }))
-  };
-
-  const results = getResults();
-  results.push(result);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(results));
-
-  goToScreen('thankyou');
 }
 
 function calculateScores() {
@@ -1177,33 +1174,68 @@ function auditAssessment() {
 // ══════════════════════════════════════════
 // ADMIN
 // ══════════════════════════════════════════
-function adminLogin() {
+async function adminLogin() {
   const pw = document.getElementById('adminPassword').value;
-  if (pw === ADMIN_PASSWORD) {
-    document.getElementById('loginError').style.display = 'none';
+  const errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+
+  try {
+    const resp = await fetch(`${API}/login`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ password: pw }),
+    });
+    const data = await resp.json();
+
+    if (resp.status === 429) {
+      errEl.textContent = data.error || 'Too many attempts. Try again later.';
+      errEl.style.display = 'block';
+      return;
+    }
+    if (!resp.ok) {
+      errEl.textContent = data.error || 'Incorrect password. Please try again.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    setToken(data.token);
+    document.getElementById('adminPassword').value = '';
     goToScreen('adminDashboard');
     renderResults();
-  } else {
-    document.getElementById('loginError').style.display = 'block';
+  } catch (_) {
+    errEl.textContent = 'Connection error. Please try again.';
+    errEl.style.display = 'block';
   }
 }
 
 function adminLogout() {
+  clearToken();
   document.getElementById('adminPassword').value = '';
   goToScreen('landing');
 }
 
-function getResults() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-  } catch { return []; }
-}
+async function renderResults() {
+  const token = getToken();
+  if (!token) { goToScreen('adminLogin'); return; }
 
-function renderResults() {
-  const results = getResults();
+  const el = document.getElementById('resultsContent');
+  el.innerHTML = '<div class="no-data" style="padding:40px 20px;text-align:center;color:var(--muted);">Loading results…</div>';
+
+  let results;
+  try {
+    const resp = await fetch(`${API}/results`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (resp.status === 401) { clearToken(); goToScreen('adminLogin'); return; }
+    if (!resp.ok) throw new Error('Server error');
+    results = await resp.json();
+  } catch (_) {
+    el.innerHTML = '<div class="no-data"><span>⚠️</span>Failed to load results. Please refresh and try again.</div>';
+    return;
+  }
+
   _resultById = {};
   results.forEach(r => (_resultById[r.id] = r));
-  const el = document.getElementById('resultsContent');
 
   if (!results.length) {
     el.innerHTML = '<div class="no-data"><span>📋</span>No assessments submitted yet.</div>';
@@ -1216,7 +1248,7 @@ function renderResults() {
       <th>Composite</th><th>Cognitive</th><th>EQ</th><th>Personality</th><th>Verdict</th><th>Detail</th>
     </tr></thead><tbody>`;
 
-  results.slice().reverse().forEach(r => {
+  results.forEach(r => {
     const rub = getRubric(r.scores, r.role);
     const verdictShort = rub.verdict === 'STRONG HIRE' ? 'Strong Hire'
       : rub.verdict === 'HIRE' ? 'Hire'
@@ -1541,28 +1573,57 @@ function closeModal(e) {
   }
 }
 
-function clearResults() {
+async function clearResults() {
+  const token = getToken();
+  if (!token) { goToScreen('adminLogin'); return; }
+
   const pw = prompt('Enter admin password to confirm deletion:');
-  if (pw !== ADMIN_PASSWORD) { alert('Incorrect password. Deletion cancelled.'); return; }
-  if (confirm('Delete ALL candidate results? This cannot be undone.')) {
-    localStorage.removeItem(STORAGE_KEY);
+  if (!pw) return;
+  if (!confirm('Delete ALL candidate results? This cannot be undone.')) return;
+
+  try {
+    const resp = await fetch(`${API}/results`, {
+      method:  'DELETE',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body:    JSON.stringify({ password: pw }),
+    });
+    if (resp.status === 401) { clearToken(); goToScreen('adminLogin'); return; }
+    if (resp.status === 403) { const d = await resp.json(); alert(d.error || 'Incorrect password.'); return; }
+    if (!resp.ok) throw new Error('Server error');
     renderResults();
+  } catch (_) {
+    alert('Failed to clear results. Please try again.');
   }
 }
 
-function exportCSV() {
-  const results = getResults();
+async function exportCSV() {
+  const token = getToken();
+  if (!token) { goToScreen('adminLogin'); return; }
+
+  let results;
+  try {
+    const resp = await fetch(`${API}/results`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (resp.status === 401) { clearToken(); goToScreen('adminLogin'); return; }
+    if (!resp.ok) throw new Error('Server error');
+    results = await resp.json();
+  } catch (_) {
+    alert('Export failed. Please try again.');
+    return;
+  }
+
   if (!results.length) { alert('No results to export.'); return; }
 
   const headers = ['Name','Role','Date','Time','Cognitive %','EQ %','Openness','Conscientiousness','Extraversion','Agreeableness','Stress Tolerance'];
   const rows = results.map(r => [
     r.name, r.role, r.date, r.time,
     r.scores.cognitive.pct, r.scores.eq.pct,
-    r.scores.ocean['Openness'] || 0,
+    r.scores.ocean['Openness']          || 0,
     r.scores.ocean['Conscientiousness'] || 0,
-    r.scores.ocean['Extraversion'] || 0,
-    r.scores.ocean['Agreeableness'] || 0,
-    r.scores.ocean['Stress Tolerance'] || 0
+    r.scores.ocean['Extraversion']      || 0,
+    r.scores.ocean['Agreeableness']     || 0,
+    r.scores.ocean['Stress Tolerance']  || 0,
   ]);
 
   const csv = [headers, ...rows].map(row => row.map(csvField).join(',')).join('\n');
