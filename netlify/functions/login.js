@@ -1,7 +1,6 @@
-'use strict';
-const crypto = require('crypto');
-const { getStore } = require('@netlify/blobs');
-const { getConfig } = require('./lib/config');
+import crypto from 'crypto';
+import { getStore } from '@netlify/blobs';
+import { getConfig } from './lib/config.js';
 
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_MS   = 15 * 60 * 1000;
@@ -13,34 +12,26 @@ function makeToken(secret) {
   return Buffer.from(JSON.stringify({ exp, sig })).toString('base64');
 }
 
-exports.handler = async (event, context) => {
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, body: '' };
+export default async (request) => {
+  if (request.method === 'OPTIONS') return new Response('', { status: 200 });
 
-  const config = await getConfig(context);
+  const config = await getConfig();
 
-  // GET — report whether the site has been configured yet
-  if (event.httpMethod === 'GET') {
-    return {
-      statusCode: 200,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ configured: !!config }),
-    };
+  if (request.method === 'GET') {
+    return new Response(JSON.stringify({ configured: !!config }), {
+      status: 200, headers: { 'Content-Type': 'application/json' }
+    });
   }
 
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method not allowed' };
-  }
+  if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 });
 
   if (!config) {
-    return {
-      statusCode: 503,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ error: 'not_configured' }),
-    };
+    return new Response(JSON.stringify({ error: 'not_configured' }), {
+      status: 503, headers: { 'Content-Type': 'application/json' }
+    });
   }
 
-  // Rate limit check
-  const authStore = getStore({ name: 'auth-state', context });
+  const authStore = getStore('auth-state');
   let attempts = { count: 0, firstAttemptTime: 0 };
   try {
     const stored = await authStore.get('failed-attempts', { type: 'json' });
@@ -50,18 +41,16 @@ exports.handler = async (event, context) => {
   const withinWindow = (Date.now() - attempts.firstAttemptTime) < LOCKOUT_MS;
   if (withinWindow && attempts.count >= MAX_ATTEMPTS) {
     const remaining = Math.ceil((attempts.firstAttemptTime + LOCKOUT_MS - Date.now()) / 60000);
-    return {
-      statusCode: 429,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ error: `Too many failed attempts. Try again in ${remaining} minute${remaining !== 1 ? 's' : ''}.` }),
-    };
+    return new Response(
+      JSON.stringify({ error: `Too many failed attempts. Try again in ${remaining} minute${remaining !== 1 ? 's' : ''}.` }),
+      { status: 429, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 
   let password;
-  try { ({ password } = JSON.parse(event.body || '{}')); }
-  catch (_) { return { statusCode: 400, body: JSON.stringify({ error: 'Bad request' }) }; }
+  try { ({ password } = await request.json()); }
+  catch (_) { return new Response(JSON.stringify({ error: 'Bad request' }), { status: 400 }); }
 
-  // Hash submitted password and compare to stored hash (timing-safe)
   const submittedHash = crypto.createHash('sha256').update(String(password || '')).digest('hex');
   const submittedBuf  = Buffer.from(submittedHash, 'hex');
   const storedBuf     = Buffer.from(config.passwordHash, 'hex');
@@ -72,18 +61,14 @@ exports.handler = async (event, context) => {
     const newCount = withinWindow ? attempts.count + 1 : 1;
     const newFirst = withinWindow ? attempts.firstAttemptTime : Date.now();
     try { await authStore.setJSON('failed-attempts', { count: newCount, firstAttemptTime: newFirst }); } catch (_) {}
-    return {
-      statusCode: 401,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ error: 'Incorrect password.' }),
-    };
+    return new Response(JSON.stringify({ error: 'Incorrect password.' }), {
+      status: 401, headers: { 'Content-Type': 'application/json' }
+    });
   }
 
   try { await authStore.delete('failed-attempts'); } catch (_) {}
 
-  return {
-    statusCode: 200,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token: makeToken(config.tokenSecret) }),
-  };
+  return new Response(JSON.stringify({ token: makeToken(config.tokenSecret) }), {
+    status: 200, headers: { 'Content-Type': 'application/json' }
+  });
 };

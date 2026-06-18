@@ -1,7 +1,6 @@
-'use strict';
-const crypto = require('crypto');
-const { getStore } = require('@netlify/blobs');
-const { getConfig } = require('./lib/config');
+import crypto from 'crypto';
+import { getStore } from '@netlify/blobs';
+import { getConfig } from './lib/config.js';
 
 function verifyToken(token, secret) {
   try {
@@ -15,37 +14,39 @@ function verifyToken(token, secret) {
   } catch (_) { return false; }
 }
 
-exports.handler = async (event, context) => {
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, body: '' };
+export default async (request) => {
+  if (request.method === 'OPTIONS') return new Response('', { status: 200 });
 
-  const config = await getConfig(context);
+  const config = await getConfig();
   if (!config) {
-    return { statusCode: 503, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'not_configured' }) };
+    return new Response(JSON.stringify({ error: 'not_configured' }), {
+      status: 503, headers: { 'Content-Type': 'application/json' }
+    });
   }
 
-  const authHeader = event.headers.authorization || event.headers.Authorization || '';
+  const authHeader = request.headers.get('authorization') || '';
   const token = authHeader.replace(/^Bearer\s+/i, '');
   if (!verifyToken(token, config.tokenSecret)) {
-    return { statusCode: 401, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Unauthorized' }) };
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401, headers: { 'Content-Type': 'application/json' }
+    });
   }
 
-  const store = getStore({ name: 'assessment-results', context });
+  const store = getStore('assessment-results');
 
-  if (event.httpMethod === 'GET') {
+  if (request.method === 'GET') {
     const { blobs } = await store.list();
     const items = await Promise.all(blobs.map(b => store.get(b.key, { type: 'json' }).catch(() => null)));
     const results = items.filter(Boolean).sort((a, b) => b.id - a.id);
-    return {
-      statusCode: 200,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(results),
-    };
+    return new Response(JSON.stringify(results), {
+      status: 200, headers: { 'Content-Type': 'application/json' }
+    });
   }
 
-  if (event.httpMethod === 'DELETE') {
+  if (request.method === 'DELETE') {
     let password;
-    try { ({ password } = JSON.parse(event.body || '{}')); }
-    catch (_) { return { statusCode: 400, body: JSON.stringify({ error: 'Bad request' }) }; }
+    try { ({ password } = await request.json()); }
+    catch (_) { return new Response(JSON.stringify({ error: 'Bad request' }), { status: 400 }); }
 
     const submittedHash = crypto.createHash('sha256').update(String(password || '')).digest('hex');
     const submittedBuf  = Buffer.from(submittedHash, 'hex');
@@ -54,17 +55,17 @@ exports.handler = async (event, context) => {
       crypto.timingSafeEqual(submittedBuf, storedBuf);
 
     if (!match) {
-      return { statusCode: 403, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Incorrect password. Deletion cancelled.' }) };
+      return new Response(JSON.stringify({ error: 'Incorrect password. Deletion cancelled.' }), {
+        status: 403, headers: { 'Content-Type': 'application/json' }
+      });
     }
 
     const { blobs } = await store.list();
     await Promise.all(blobs.map(b => store.delete(b.key)));
-    return {
-      statusCode: 200,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ok: true }),
-    };
+    return new Response(JSON.stringify({ ok: true }), {
+      status: 200, headers: { 'Content-Type': 'application/json' }
+    });
   }
 
-  return { statusCode: 405, body: 'Method not allowed' };
+  return new Response('Method not allowed', { status: 405 });
 };

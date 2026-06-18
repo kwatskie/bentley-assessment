@@ -1,8 +1,3 @@
-'use strict';
-
-// Correct answer indices extracted from the question banks — server-authoritative.
-// Order matches buildQuestions() in index.html: shared first, then role-specific.
-
 const SHARED_COG = [2, 2, 2, 0, 1];
 
 const ROLE_COG = {
@@ -25,23 +20,21 @@ const ROLE_EQ = {
   'Cook':                            [1, 1, 2, 2, 1, 2, 2, 2, 1, 1, 2],
 };
 
-// Order matches PERSONALITY_QUESTIONS in index.html
 const PERSONALITY_TRAITS = [
   'Openness', 'Conscientiousness', 'Extraversion', 'Agreeableness', 'Stress Tolerance',
   'Openness', 'Conscientiousness', 'Agreeableness', 'Stress Tolerance', 'Conscientiousness',
 ];
 
-const VALID_ROLES = Object.keys(ROLE_COG);
+export const VALID_ROLES = Object.keys(ROLE_COG);
 
-function resolveRole(role) {
+export function resolveRole(role) {
   if (VALID_ROLES.includes(role)) return role;
   return VALID_ROLES.find(k =>
     role && role.toLowerCase().includes(k.split('/')[0].trim().toLowerCase())
   ) || null;
 }
 
-// Returns {cognitive, eq, ocean} or null on bad input.
-function calculateScores(role, answers) {
+export function calculateScores(role, answers) {
   const key = resolveRole(role);
   if (!key) return null;
 
@@ -49,15 +42,11 @@ function calculateScores(role, answers) {
   const eqCorrect  = [...SHARED_EQ,  ...ROLE_EQ[key]];
 
   let cog = 0;
-  cogCorrect.forEach((correct, i) => {
-    if (answers[i] === correct) cog++;
-  });
+  cogCorrect.forEach((correct, i) => { if (answers[i] === correct) cog++; });
 
   const eqOffset = cogCorrect.length;
   let eq = 0;
-  eqCorrect.forEach((correct, i) => {
-    if (answers[eqOffset + i] === correct) eq++;
-  });
+  eqCorrect.forEach((correct, i) => { if (answers[eqOffset + i] === correct) eq++; });
 
   const personalityOffset = eqOffset + eqCorrect.length;
   const oceanSum   = { Openness: 0, Conscientiousness: 0, Extraversion: 0, Agreeableness: 0, 'Stress Tolerance': 0 };
@@ -83,8 +72,7 @@ function calculateScores(role, answers) {
   };
 }
 
-// Returns per-question wasCorrect booleans (null for personality).
-function computeWasCorrect(role, answers) {
+export function computeWasCorrect(role, answers) {
   const key = resolveRole(role);
   if (!key) return [];
   const cogCorrect = [...SHARED_COG, ...ROLE_COG[key]];
@@ -96,5 +84,3 @@ function computeWasCorrect(role, answers) {
   PERSONALITY_TRAITS.forEach(() => result.push(null));
   return result;
 }
-
-module.exports = { calculateScores, computeWasCorrect, resolveRole, VALID_ROLES };

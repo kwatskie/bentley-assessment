@@ -1,19 +1,16 @@
-'use strict';
-const { getStore } = require('@netlify/blobs');
+import { getStore } from '@netlify/blobs';
 
 const STORE_NAME = 'assessment-config';
 const CONFIG_KEY = 'site-config';
 
-async function getConfig(context) {
+export async function getConfig() {
   try {
-    const store = getStore({ name: STORE_NAME, context });
+    const store = getStore(STORE_NAME);
     return await store.get(CONFIG_KEY, { type: 'json' });
   } catch (_) { return null; }
 }
 
-async function saveConfig(cfg, context) {
-  const store = getStore({ name: STORE_NAME, context });
+export async function saveConfig(cfg) {
+  const store = getStore(STORE_NAME);
   await store.setJSON(CONFIG_KEY, cfg);
 }
-
-module.exports = { getConfig, saveConfig };

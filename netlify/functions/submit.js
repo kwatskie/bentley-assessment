@@ -1,41 +1,31 @@
-'use strict';
-const { getStore } = require('@netlify/blobs');
-const { calculateScores, computeWasCorrect, resolveRole, VALID_ROLES } = require('./lib/scoring');
+import { getStore } from '@netlify/blobs';
+import { calculateScores, computeWasCorrect, resolveRole } from './lib/scoring.js';
 
-exports.handler = async (event, context) => {
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, body: '' };
-  if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method not allowed' };
+export default async (request) => {
+  if (request.method === 'OPTIONS') return new Response('', { status: 200 });
+  if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 });
 
   let body;
-  try { body = JSON.parse(event.body || '{}'); }
-  catch (_) { return { statusCode: 400, body: JSON.stringify({ error: 'Invalid JSON' }) }; }
+  try { body = await request.json(); }
+  catch (_) { return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400 }); }
 
   const { name, role, answers, questions: clientQs } = body;
 
-  if (!name || typeof name !== 'string' || !name.trim()) {
-    return { statusCode: 400, body: JSON.stringify({ error: 'Name is required' }) };
-  }
-  if (!role || !resolveRole(role)) {
-    return { statusCode: 400, body: JSON.stringify({ error: 'Invalid role' }) };
-  }
-  if (!answers || typeof answers !== 'object') {
-    return { statusCode: 400, body: JSON.stringify({ error: 'Answers required' }) };
-  }
+  if (!name || typeof name !== 'string' || !name.trim())
+    return new Response(JSON.stringify({ error: 'Name is required' }), { status: 400 });
+  if (!role || !resolveRole(role))
+    return new Response(JSON.stringify({ error: 'Invalid role' }), { status: 400 });
+  if (!answers || typeof answers !== 'object')
+    return new Response(JSON.stringify({ error: 'Answers required' }), { status: 400 });
 
-  // Coerce string keys ("0","1"...) from JSON to numbers
   const normalizedAnswers = {};
   Object.keys(answers).forEach(k => { normalizedAnswers[Number(k)] = answers[k]; });
 
-  // Server-side scoring — client-supplied scores are ignored
   const scores = calculateScores(role, normalizedAnswers);
-  if (!scores) {
-    return { statusCode: 422, body: JSON.stringify({ error: 'Scoring failed' }) };
-  }
+  if (!scores) return new Response(JSON.stringify({ error: 'Scoring failed' }), { status: 422 });
 
-  // Server re-computes wasCorrect for every question
   const serverWasCorrect = computeWasCorrect(role, normalizedAnswers);
 
-  // Keep display data from client (text, options) but override all scoring fields
   const questions = Array.isArray(clientQs)
     ? clientQs.map((q, i) => ({
         section:    String(q.section    || ''),
@@ -60,12 +50,10 @@ exports.handler = async (event, context) => {
     questions,
   };
 
-  const store = getStore({ name: 'assessment-results', context });
+  const store = getStore('assessment-results');
   await store.setJSON(String(id), result);
 
-  return {
-    statusCode: 200,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ok: true }),
-  };
+  return new Response(JSON.stringify({ ok: true }), {
+    status: 200, headers: { 'Content-Type': 'application/json' }
+  });
 };
