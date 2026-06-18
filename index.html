@@ -343,6 +343,11 @@
     color: var(--danger); border-radius: 8px;
     padding: 10px 14px; font-size: 13px; margin-top: 10px; display: none;
   }
+  .success-msg {
+    background: #F0FFF4; border: 1px solid #86EFAC;
+    color: #166534; border-radius: 8px;
+    padding: 10px 14px; font-size: 13px; margin-top: 10px; display: none;
+  }
 
   /* ─── ADMIN DASHBOARD ─── */
   .admin-wrap {
@@ -571,7 +576,8 @@
 <!-- ══════════════════════ SCREEN: ADMIN LOGIN ══════════════════════ -->
 <div id="screen-adminLogin" class="screen">
   <div class="admin-login">
-    <div class="admin-card">
+    <!-- Normal login (default) -->
+    <div class="admin-card" id="loginForm">
       <h2>Admin Access</h2>
       <p class="sub">Results are restricted to authorized personnel only.</p>
       <div class="field-group">
@@ -579,7 +585,23 @@
         <input type="password" id="adminPassword" placeholder="Enter password" onkeydown="if(event.key==='Enter')adminLogin()">
       </div>
       <button class="btn-primary" onclick="adminLogin()">Access Results →</button>
-      <div class="error-msg" id="loginError">Incorrect password. Please try again.</div>
+      <div class="error-msg" id="loginError" style="display:none"></div>
+      <div class="success-msg" id="loginSuccess" style="display:none"></div>
+    </div>
+    <!-- First-time setup (shown when not yet configured) -->
+    <div class="admin-card" id="setupForm" style="display:none">
+      <h2>Create Admin Password</h2>
+      <p class="sub">First-time setup — choose a password to protect candidate results.</p>
+      <div class="field-group">
+        <label>New Password</label>
+        <input type="password" id="setupPassword" placeholder="At least 8 characters" onkeydown="if(event.key==='Enter')submitSetup()">
+      </div>
+      <div class="field-group">
+        <label>Confirm Password</label>
+        <input type="password" id="setupConfirm" placeholder="Re-enter password" onkeydown="if(event.key==='Enter')submitSetup()">
+      </div>
+      <button class="btn-primary" onclick="submitSetup()">Set Password →</button>
+      <div class="error-msg" id="setupError" style="display:none"></div>
     </div>
   </div>
 </div>
@@ -917,9 +939,67 @@ let _resultById = {};
 // ══════════════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════════════
-function goToScreen(id) {
+async function goToScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + id).classList.add('active');
+  if (id === 'adminLogin') await checkAdminSetup();
+}
+
+async function checkAdminSetup() {
+  try {
+    const resp = await fetch(`${API}/login`);
+    if (!resp.ok) return;
+    const { configured } = await resp.json();
+    if (!configured) {
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('setupForm').style.display = '';
+    } else {
+      document.getElementById('loginForm').style.display = '';
+      document.getElementById('setupForm').style.display = 'none';
+    }
+  } catch (_) { /* network error — show login form as fallback */ }
+}
+
+async function submitSetup() {
+  const pw      = document.getElementById('setupPassword').value;
+  const confirm = document.getElementById('setupConfirm').value;
+  const errEl   = document.getElementById('setupError');
+  errEl.style.display = 'none';
+
+  if (pw.length < 8) {
+    errEl.textContent = 'Password must be at least 8 characters.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (pw !== confirm) {
+    errEl.textContent = 'Passwords do not match.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  try {
+    const resp = await fetch(`${API}/setup`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ password: pw }),
+    });
+    if (!resp.ok) {
+      const d = await resp.json();
+      errEl.textContent = d.error || 'Setup failed. Please try again.';
+      errEl.style.display = 'block';
+      return;
+    }
+    document.getElementById('setupPassword').value = '';
+    document.getElementById('setupConfirm').value  = '';
+    document.getElementById('setupForm').style.display  = 'none';
+    document.getElementById('loginForm').style.display  = '';
+    const ok = document.getElementById('loginSuccess');
+    ok.textContent = 'Password created! You can now log in.';
+    ok.style.display = 'block';
+  } catch (_) {
+    errEl.textContent = 'Network error. Please try again.';
+    errEl.style.display = 'block';
+  }
 }
 
 function startAssessment() {
@@ -1637,6 +1717,7 @@ window.selectLikert    = selectLikert;
 window.goToScreen      = goToScreen;
 window.adminLogin      = adminLogin;
 window.adminLogout     = adminLogout;
+window.submitSetup     = submitSetup;
 window.openModal       = openModal;
 window.closeModal      = closeModal;
 window.exportCSV       = exportCSV;

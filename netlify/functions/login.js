@@ -1,10 +1,11 @@
 'use strict';
 const crypto = require('crypto');
 const { getStore } = require('@netlify/blobs');
+const { getConfig } = require('./lib/config');
 
 const MAX_ATTEMPTS = 5;
-const LOCKOUT_MS   = 15 * 60 * 1000; // 15 minutes
-const TOKEN_TTL_MS =  8 * 60 * 60 * 1000; // 8 hours
+const LOCKOUT_MS   = 15 * 60 * 1000;
+const TOKEN_TTL_MS =  8 * 60 * 60 * 1000;
 
 function makeToken(secret) {
   const exp = Date.now() + TOKEN_TTL_MS;
@@ -13,17 +14,29 @@ function makeToken(secret) {
 }
 
 exports.handler = async (event) => {
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, body: '' };
+  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, body: '' };
+
+  const config = await getConfig();
+
+  // GET — report whether the site has been configured yet
+  if (event.httpMethod === 'GET') {
+    return {
+      statusCode: 200,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ configured: !!config }),
+    };
   }
+
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method not allowed' };
   }
 
-  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
-  const TOKEN_SECRET   = process.env.TOKEN_SECRET;
-  if (!ADMIN_PASSWORD || !TOKEN_SECRET) {
-    return { statusCode: 503, body: JSON.stringify({ error: 'Server misconfiguration' }) };
+  if (!config) {
+    return {
+      statusCode: 503,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: 'not_configured' }),
+    };
   }
 
   // Rate limit check
@@ -32,7 +45,7 @@ exports.handler = async (event) => {
   try {
     const stored = await authStore.get('failed-attempts', { type: 'json' });
     if (stored) attempts = stored;
-  } catch (_) { /* first ever call */ }
+  } catch (_) {}
 
   const withinWindow = (Date.now() - attempts.firstAttemptTime) < LOCKOUT_MS;
   if (withinWindow && attempts.count >= MAX_ATTEMPTS) {
@@ -45,25 +58,20 @@ exports.handler = async (event) => {
   }
 
   let password;
-  try {
-    ({ password } = JSON.parse(event.body || '{}'));
-  } catch (_) {
-    return { statusCode: 400, body: JSON.stringify({ error: 'Bad request' }) };
-  }
+  try { ({ password } = JSON.parse(event.body || '{}')); }
+  catch (_) { return { statusCode: 400, body: JSON.stringify({ error: 'Bad request' }) }; }
 
-  // Constant-time password comparison to prevent timing attacks
-  const pwBuf       = Buffer.from(String(password  || '').padEnd(64));
-  const correctBuf  = Buffer.from(String(ADMIN_PASSWORD).padEnd(64));
-  const match = pwBuf.length === correctBuf.length &&
-    crypto.timingSafeEqual(pwBuf, correctBuf) &&
-    password === ADMIN_PASSWORD;
+  // Hash submitted password and compare to stored hash (timing-safe)
+  const submittedHash = crypto.createHash('sha256').update(String(password || '')).digest('hex');
+  const submittedBuf  = Buffer.from(submittedHash, 'hex');
+  const storedBuf     = Buffer.from(config.passwordHash, 'hex');
+  const match = submittedBuf.length === storedBuf.length &&
+    crypto.timingSafeEqual(submittedBuf, storedBuf);
 
   if (!match) {
     const newCount = withinWindow ? attempts.count + 1 : 1;
     const newFirst = withinWindow ? attempts.firstAttemptTime : Date.now();
-    try {
-      await authStore.setJSON('failed-attempts', { count: newCount, firstAttemptTime: newFirst });
-    } catch (_) { /* non-fatal */ }
+    try { await authStore.setJSON('failed-attempts', { count: newCount, firstAttemptTime: newFirst }); } catch (_) {}
     return {
       statusCode: 401,
       headers: { 'Content-Type': 'application/json' },
@@ -71,12 +79,11 @@ exports.handler = async (event) => {
     };
   }
 
-  // Success — clear lockout counter
-  try { await authStore.delete('failed-attempts'); } catch (_) { /* non-fatal */ }
+  try { await authStore.delete('failed-attempts'); } catch (_) {}
 
   return {
     statusCode: 200,
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token: makeToken(TOKEN_SECRET) }),
+    body: JSON.stringify({ token: makeToken(config.tokenSecret) }),
   };
 };
