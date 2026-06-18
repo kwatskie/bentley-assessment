@@ -13,10 +13,10 @@ function makeToken(secret) {
   return Buffer.from(JSON.stringify({ exp, sig })).toString('base64');
 }
 
-exports.handler = async (event) => {
+exports.handler = async (event, context) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, body: '' };
 
-  const config = await getConfig();
+  const config = await getConfig(context);
 
   // GET — report whether the site has been configured yet
   if (event.httpMethod === 'GET') {
@@ -40,7 +40,7 @@ exports.handler = async (event) => {
   }
 
   // Rate limit check
-  const authStore = getStore('auth-state');
+  const authStore = getStore({ name: 'auth-state', context });
   let attempts = { count: 0, firstAttemptTime: 0 };
   try {
     const stored = await authStore.get('failed-attempts', { type: 'json' });

@@ -2,7 +2,7 @@
 const { getStore } = require('@netlify/blobs');
 const { calculateScores, computeWasCorrect, resolveRole, VALID_ROLES } = require('./lib/scoring');
 
-exports.handler = async (event) => {
+exports.handler = async (event, context) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, body: '' };
   if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method not allowed' };
 
@@ -60,7 +60,7 @@ exports.handler = async (event) => {
     questions,
   };
 
-  const store = getStore('assessment-results');
+  const store = getStore({ name: 'assessment-results', context });
   await store.setJSON(String(id), result);
 
   return {

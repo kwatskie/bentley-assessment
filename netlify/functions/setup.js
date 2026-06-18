@@ -2,11 +2,11 @@
 const crypto = require('crypto');
 const { getConfig, saveConfig } = require('./lib/config');
 
-exports.handler = async (event) => {
+exports.handler = async (event, context) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, body: '' };
   if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method not allowed' };
 
-  const existing = await getConfig();
+  const existing = await getConfig(context);
   if (existing) {
     return {
       statusCode: 409,
@@ -29,7 +29,7 @@ exports.handler = async (event) => {
 
   const passwordHash = crypto.createHash('sha256').update(String(password)).digest('hex');
   const tokenSecret  = crypto.randomBytes(48).toString('hex');
-  await saveConfig({ passwordHash, tokenSecret });
+  await saveConfig({ passwordHash, tokenSecret }, context);
 
   return {
     statusCode: 200,

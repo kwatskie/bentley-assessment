@@ -15,10 +15,10 @@ function verifyToken(token, secret) {
   } catch (_) { return false; }
 }
 
-exports.handler = async (event) => {
+exports.handler = async (event, context) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, body: '' };
 
-  const config = await getConfig();
+  const config = await getConfig(context);
   if (!config) {
     return { statusCode: 503, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'not_configured' }) };
   }
@@ -29,7 +29,7 @@ exports.handler = async (event) => {
     return { statusCode: 401, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Unauthorized' }) };
   }
 
-  const store = getStore('assessment-results');
+  const store = getStore({ name: 'assessment-results', context });
 
   if (event.httpMethod === 'GET') {
     const { blobs } = await store.list();
