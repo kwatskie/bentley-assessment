@@ -576,8 +576,7 @@
 <!-- ══════════════════════ SCREEN: ADMIN LOGIN ══════════════════════ -->
 <div id="screen-adminLogin" class="screen">
   <div class="admin-login">
-    <!-- Normal login (default) -->
-    <div class="admin-card" id="loginForm">
+    <div class="admin-card">
       <h2>Admin Access</h2>
       <p class="sub">Results are restricted to authorized personnel only.</p>
       <div class="field-group">
@@ -586,22 +585,6 @@
       </div>
       <button class="btn-primary" onclick="adminLogin()">Access Results →</button>
       <div class="error-msg" id="loginError" style="display:none"></div>
-      <div class="success-msg" id="loginSuccess" style="display:none"></div>
-    </div>
-    <!-- First-time setup (shown when not yet configured) -->
-    <div class="admin-card" id="setupForm" style="display:none">
-      <h2>Create Admin Password</h2>
-      <p class="sub">First-time setup — choose a password to protect candidate results.</p>
-      <div class="field-group">
-        <label>New Password</label>
-        <input type="password" id="setupPassword" placeholder="At least 8 characters" onkeydown="if(event.key==='Enter')submitSetup()">
-      </div>
-      <div class="field-group">
-        <label>Confirm Password</label>
-        <input type="password" id="setupConfirm" placeholder="Re-enter password" onkeydown="if(event.key==='Enter')submitSetup()">
-      </div>
-      <button class="btn-primary" onclick="submitSetup()">Set Password →</button>
-      <div class="error-msg" id="setupError" style="display:none"></div>
     </div>
   </div>
 </div>
@@ -914,7 +897,8 @@ let QUESTIONS = [];
 const LIKERT_LABELS = ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'];
 const LIKERT_VALUES = [1, 2, 3, 4, 5];
 
-const API = '/.netlify/functions';
+const API          = '/.netlify/functions';
+const STORAGE_KEY  = 'bentley_assessment_results';
 
 function escapeHTML(str) {
   return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
@@ -939,67 +923,9 @@ let _resultById = {};
 // ══════════════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════════════
-async function goToScreen(id) {
+function goToScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + id).classList.add('active');
-  if (id === 'adminLogin') await checkAdminSetup();
-}
-
-async function checkAdminSetup() {
-  try {
-    const resp = await fetch(`${API}/login`);
-    if (!resp.ok) return;
-    const { configured } = await resp.json();
-    if (!configured) {
-      document.getElementById('loginForm').style.display = 'none';
-      document.getElementById('setupForm').style.display = '';
-    } else {
-      document.getElementById('loginForm').style.display = '';
-      document.getElementById('setupForm').style.display = 'none';
-    }
-  } catch (_) { /* network error — show login form as fallback */ }
-}
-
-async function submitSetup() {
-  const pw      = document.getElementById('setupPassword').value;
-  const confirm = document.getElementById('setupConfirm').value;
-  const errEl   = document.getElementById('setupError');
-  errEl.style.display = 'none';
-
-  if (pw.length < 8) {
-    errEl.textContent = 'Password must be at least 8 characters.';
-    errEl.style.display = 'block';
-    return;
-  }
-  if (pw !== confirm) {
-    errEl.textContent = 'Passwords do not match.';
-    errEl.style.display = 'block';
-    return;
-  }
-
-  try {
-    const resp = await fetch(`${API}/setup`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ password: pw }),
-    });
-    if (!resp.ok) {
-      const d = await resp.json();
-      errEl.textContent = d.error || 'Setup failed. Please try again.';
-      errEl.style.display = 'block';
-      return;
-    }
-    document.getElementById('setupPassword').value = '';
-    document.getElementById('setupConfirm').value  = '';
-    document.getElementById('setupForm').style.display  = 'none';
-    document.getElementById('loginForm').style.display  = '';
-    const ok = document.getElementById('loginSuccess');
-    ok.textContent = 'Password created! You can now log in.';
-    ok.style.display = 'block';
-  } catch (_) {
-    errEl.textContent = 'Network error. Please try again.';
-    errEl.style.display = 'block';
-  }
 }
 
 function startAssessment() {
@@ -1098,15 +1024,10 @@ function selectLikert(val) {
 // SUBMIT & SCORING
 // ══════════════════════════════════════════
 async function submitAssessment() {
-  // Send only raw answers + display data — server scores independently
   const questions = QUESTIONS.map((q, i) => ({
-    section: q.section,
-    text:    q.text,
-    type:    q.type,
-    answer:  answers[i],
-    options: q.options || null,
-    trait:   q.trait   || null,
-    wasCorrect: null, // server overwrites this
+    section: q.section, text: q.text, type: q.type,
+    answer: answers[i], options: q.options || null, trait: q.trait || null,
+    wasCorrect: null,
   }));
 
   try {
@@ -1116,6 +1037,10 @@ async function submitAssessment() {
       body:    JSON.stringify({ name: candidateName, role: candidateRole, answers, questions }),
     });
     if (!resp.ok) throw new Error('Server error');
+    const data = await resp.json();
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    stored.push(data.result);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
     goToScreen('thankyou');
   } catch (_) {
     alert('Submission failed. Please try again or contact your administrator.');
@@ -1290,25 +1215,12 @@ function adminLogout() {
   goToScreen('landing');
 }
 
-async function renderResults() {
-  const token = getToken();
-  if (!token) { goToScreen('adminLogin'); return; }
+function renderResults() {
+  if (!getToken()) { goToScreen('adminLogin'); return; }
 
   const el = document.getElementById('resultsContent');
-  el.innerHTML = '<div class="no-data" style="padding:40px 20px;text-align:center;color:var(--muted);">Loading results…</div>';
-
-  let results;
-  try {
-    const resp = await fetch(`${API}/results`, {
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
-    if (resp.status === 401) { clearToken(); goToScreen('adminLogin'); return; }
-    if (!resp.ok) throw new Error('Server error');
-    results = await resp.json();
-  } catch (_) {
-    el.innerHTML = '<div class="no-data"><span>⚠️</span>Failed to load results. Please refresh and try again.</div>';
-    return;
-  }
+  const results = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]').sort((a, b) => b.id - a.id);
+  {
 
   _resultById = {};
   results.forEach(r => (_resultById[r.id] = r));
@@ -1650,44 +1562,32 @@ function closeModal(e) {
 }
 
 async function clearResults() {
-  const token = getToken();
-  if (!token) { goToScreen('adminLogin'); return; }
+  if (!getToken()) { goToScreen('adminLogin'); return; }
 
   const pw = prompt('Enter admin password to confirm deletion:');
   if (!pw) return;
   if (!confirm('Delete ALL candidate results? This cannot be undone.')) return;
 
   try {
-    const resp = await fetch(`${API}/results`, {
-      method:  'DELETE',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    const resp = await fetch(`${API}/login`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ password: pw }),
     });
-    if (resp.status === 401) { clearToken(); goToScreen('adminLogin'); return; }
-    if (resp.status === 403) { const d = await resp.json(); alert(d.error || 'Incorrect password.'); return; }
-    if (!resp.ok) throw new Error('Server error');
-    renderResults();
+    if (!resp.ok) { const d = await resp.json(); alert(d.error || 'Incorrect password. Deletion cancelled.'); return; }
   } catch (_) {
-    alert('Failed to clear results. Please try again.');
-  }
-}
-
-async function exportCSV() {
-  const token = getToken();
-  if (!token) { goToScreen('adminLogin'); return; }
-
-  let results;
-  try {
-    const resp = await fetch(`${API}/results`, {
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
-    if (resp.status === 401) { clearToken(); goToScreen('adminLogin'); return; }
-    if (!resp.ok) throw new Error('Server error');
-    results = await resp.json();
-  } catch (_) {
-    alert('Export failed. Please try again.');
+    alert('Failed to verify password. Please try again.');
     return;
   }
+
+  localStorage.removeItem(STORAGE_KEY);
+  renderResults();
+}
+
+function exportCSV() {
+  if (!getToken()) { goToScreen('adminLogin'); return; }
+
+  const results = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
 
   if (!results.length) { alert('No results to export.'); return; }
 
@@ -1717,7 +1617,6 @@ window.selectLikert    = selectLikert;
 window.goToScreen      = goToScreen;
 window.adminLogin      = adminLogin;
 window.adminLogout     = adminLogout;
-window.submitSetup     = submitSetup;
 window.openModal       = openModal;
 window.closeModal      = closeModal;
 window.exportCSV       = exportCSV;

@@ -1,4 +1,3 @@
-import { getStore } from '@netlify/blobs';
 import { calculateScores, computeWasCorrect, resolveRole } from './lib/scoring.js';
 
 export default async (request) => {
@@ -38,22 +37,17 @@ export default async (request) => {
       }))
     : [];
 
-  const id = Date.now();
-  const result = {
-    id,
-    name:  String(name).trim().slice(0, 100),
-    role:  String(role),
-    date:  new Date().toISOString().split('T')[0],
-    time:  new Date().toTimeString().slice(0, 5),
-    scores,
-    answers: normalizedAnswers,
-    questions,
-  };
-
-  const store = getStore('assessment-results');
-  await store.setJSON(String(id), result);
-
-  return new Response(JSON.stringify({ ok: true }), {
-    status: 200, headers: { 'Content-Type': 'application/json' }
-  });
+  return new Response(JSON.stringify({
+    ok: true,
+    result: {
+      id:        Date.now(),
+      name:      String(name).trim().slice(0, 100),
+      role:      String(role),
+      date:      new Date().toISOString().split('T')[0],
+      time:      new Date().toTimeString().slice(0, 5),
+      scores,
+      answers:   normalizedAnswers,
+      questions,
+    },
+  }), { status: 200, headers: { 'Content-Type': 'application/json' } });
 };
