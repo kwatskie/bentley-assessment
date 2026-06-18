@@ -1220,7 +1220,6 @@ function renderResults() {
 
   const el = document.getElementById('resultsContent');
   const results = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]').sort((a, b) => b.id - a.id);
-  {
 
   _resultById = {};
   results.forEach(r => (_resultById[r.id] = r));
